@@ -1,0 +1,24 @@
+{
+  "name": "Property Tracker",
+  "short_name": "PropTracker",
+  "description": "Track property improvements across all units and yards",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1c3a2a",
+  "theme_color": "#1c3a2a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

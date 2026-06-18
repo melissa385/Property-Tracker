@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1c3a2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PropTracker">
+<title>Property Tracker</title>
+<link rel="manifest" href="./manifest.json">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --forest:#1c3a2a;
+  --forest-mid:#254d38;
+  --forest-light:#2e6044;
+  --sage:#4a7c5f;
+  --mint:#a8d5b5;
+  --green-accent:#5aab6e;
+  --green-bright:#3d8f55;
+  --cream:#f4f7f5;
+  --parchment:#e8ede9;
+  --white:#ffffff;
+  --ink:#1a2e22;
+  --slate:#4a6358;
+  --muted:#7a9a87;
+  --gold:#c8a84b;
+  --danger:#c0392b;
+  --r:8px;
+  --sh:0 2px 10px rgba(28,58,42,.10);
+  --sh-lg:0 8px 28px rgba(28,58,42,.16);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;overscroll-behavior:none;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--forest);color:var(--mint);padding:0 16px;padding-top:var(--safe-top);height:calc(54px + var(--safe-top));display:flex;align-items:flex-end;padding-bottom:10px;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);flex-shrink:0;}
+.brand{display:flex;align-items:center;gap:8px;font-family:Georgia,serif;font-size:1.05rem;font-weight:bold;cursor:pointer;user-select:none;}
+.brand b{color:var(--green-accent);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.sync-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:var(--mint);border-radius:20px;padding:5px 12px;font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s;}
+.sync-btn:hover{background:rgba(255,255,255,.18);}
+.sync-btn.spinning .sync-icon{animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.user-avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--mint);object-fit:cover;cursor:pointer;}
+.user-initial{width:30px;height:30px;border-radius:50%;background:var(--forest-light);border:2px solid var(--mint);color:var(--mint);font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* ── LAYOUT ── */
+.app-body{display:flex;flex:1;height:calc(100vh - 54px - var(--safe-top));overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:255px;background:var(--forest-mid);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:transform .25s ease;}
+@media(max-width:680px){
+  .sidebar{position:fixed;top:calc(54px + var(--safe-top));bottom:0;left:0;z-index:90;transform:translateX(-100%);width:80vw;max-width:280px;}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.3);}
+  .sidebar-overlay{display:none;position:fixed;inset:0;top:calc(54px + var(--safe-top));background:rgba(0,0,0,.4);z-index:89;}
+  .sidebar-overlay.open{display:block;}
+}
+.sb-label{font-size:.63rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:14px 14px 4px;}
+.sb-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;}
+.sb-scroll::-webkit-scrollbar{width:3px;}
+.sb-scroll::-webkit-scrollbar-thumb{background:var(--forest-light);border-radius:4px;}
+.prop-item{border-bottom:1px solid rgba(255,255,255,.05);}
+.prop-hdr{display:flex;align-items:center;gap:7px;padding:10px 14px;cursor:pointer;color:#c5dccb;font-size:.84rem;font-weight:600;transition:background .13s;user-select:none;-webkit-tap-highlight-color:transparent;}
+.prop-hdr:hover,.prop-hdr.active{background:var(--forest-light);}
+.prop-hdr.active{color:var(--mint);}
+.prop-hdr .chev{margin-left:auto;font-size:.62rem;opacity:.4;transition:transform .2s;flex-shrink:0;}
+.prop-hdr.open .chev{transform:rotate(90deg);}
+.prop-hdr .dx{font-size:.68rem;opacity:0;color:#e88;flex-shrink:0;padding:2px 4px;}
+.prop-hdr:hover .dx{opacity:1;}
+.sub-list{display:none;}
+.sub-list.open{display:block;}
+.sub-item{display:flex;align-items:center;gap:6px;padding:7px 14px 7px 28px;cursor:pointer;color:#8fb8a0;font-size:.79rem;transition:background .1s,color .1s;-webkit-tap-highlight-color:transparent;}
+.sub-item:hover{background:rgba(255,255,255,.04);color:#c5dccb;}
+.sub-item.active{color:var(--green-accent);font-weight:700;}
+.sub-item .dx{font-size:.68rem;opacity:0;margin-left:auto;color:#e88;padding:2px 4px;}
+.sub-item:hover .dx{opacity:1;}
+.sub-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.sb-add{margin:8px 10px 12px;padding:8px;background:rgba(90,171,110,.12);border:1px dashed rgba(90,171,110,.35);border-radius:var(--r);color:var(--green-accent);font-size:.78rem;cursor:pointer;text-align:center;transition:background .13s;}
+.sb-add:hover{background:rgba(90,171,110,.22);}
+
+/* hamburger */
+.hamburger{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:4px;}
+@media(max-width:680px){.hamburger{display:flex;}}
+.hamburger span{width:20px;height:2px;background:var(--mint);border-radius:2px;transition:all .2s;}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 24px;min-width:0;}
+.main::-webkit-scrollbar{width:4px;}
+.main::-webkit-scrollbar-thumb{background:var(--parchment);border-radius:4px;}
+@media(max-width:680px){.main{padding:16px 14px;}}
+
+/* ── BREADCRUMB ── */
+.bc{font-size:.73rem;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.bc .crumb{cursor:pointer;transition:color .12s;}
+.bc .crumb:hover{color:var(--green-bright);}
+.bc .sep{opacity:.4;}
+
+/* ── PAGE HEADER ── */
+.pg-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;}
+.pg-title{font-family:Georgia,serif;font-size:1.5rem;font-weight:bold;color:var(--forest);line-height:1.15;}
+.pg-sub{font-size:.8rem;color:var(--muted);margin-top:3px;}
+.hdr-btns{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}
+
+/* ── STATS ── */
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.stat{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);padding:10px 14px;min-width:80px;box-shadow:var(--sh);}
+.stat .v{font-size:1.25rem;font-weight:700;font-family:Georgia,serif;color:var(--forest);line-height:1;}
+.stat .l{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.stat.g .v{color:var(--green-bright);}
+.stat.gold .v{color:var(--gold);}
+
+/* ── CARD GRID ── */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px;}
+.card{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);padding:14px;cursor:pointer;transition:box-shadow .13s,transform .1s,border-color .13s;box-shadow:var(--sh);position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--parchment);transition:background .18s;}
+.card:hover,.card:active{box-shadow:var(--sh-lg);border-color:var(--mint);}
+.card:hover::before,.card:active::before{background:var(--green-accent);}
+.card.yard-card:hover::before,.card.yard-card:active::before{background:var(--gold);}
+.card .cn{font-weight:700;font-size:.9rem;margin-bottom:2px;}
+.card .cm{font-size:.74rem;color:var(--muted);margin-bottom:9px;}
+.card .cpll{font-size:.68rem;color:var(--slate);margin-bottom:3px;display:flex;justify-content:space-between;}
+.pbar{height:4px;background:var(--parchment);border-radius:99px;overflow:hidden;}
+.pfill{height:100%;background:var(--green-accent);border-radius:99px;transition:width .4s;}
+.pfill.done{background:var(--green-bright);}
+
+/* ── IMPROVEMENT CARDS ── */
+.imp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.imp-hdr-row h2{font-family:Georgia,serif;font-size:1.05rem;color:var(--forest);}
+.imp-card{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sh);overflow:hidden;}
+.imp-ch{display:flex;align-items:center;gap:9px;padding:12px 14px;cursor:pointer;border-bottom:1px solid transparent;-webkit-tap-highlight-color:transparent;}
+.imp-card.expanded .imp-ch{border-bottom-color:var(--parchment);}
+.badge{padding:2px 8px;border-radius:99px;font-size:.63rem;font-weight:700;letter-spacing:.04em;flex-shrink:0;}
+.b-planned{background:#eef0fa;color:#3949ab;}
+.b-active{background:#fff8e8;color:#c17f00;}
+.b-done{background:#eaf5ec;color:#2d7d46;}
+.b-paused{background:#fdecea;color:#c0392b;}
+.imp-title{font-weight:700;font-size:.88rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.imp-cost{font-size:.78rem;color:var(--muted);font-family:Georgia,serif;margin-left:auto;white-space:nowrap;flex-shrink:0;}
+.imp-tog{font-size:.65rem;color:var(--muted);margin-left:6px;transition:transform .18s;flex-shrink:0;}
+.imp-card.expanded .imp-tog{transform:rotate(180deg);}
+.imp-body{display:none;padding:14px;}
+.imp-card.expanded .imp-body{display:block;}
+.meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:14px;}
+.ml{font-size:.63rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1px;}
+.mv{font-size:.83rem;font-weight:600;color:var(--ink);}
+.notes-box{background:var(--parchment);border-left:3px solid var(--green-accent);border-radius:0 6px 6px 0;padding:9px 12px;font-size:.82rem;color:var(--slate);margin-bottom:14px;line-height:1.5;}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:24px;}
+.tl::before{content:'';position:absolute;left:6px;top:8px;bottom:0;width:2px;background:var(--parchment);}
+.tl-entry{position:relative;margin-bottom:16px;}
+.tl-entry:last-child{margin-bottom:0;}
+.tl-dot{position:absolute;left:-20px;top:3px;width:10px;height:10px;border-radius:50%;border:2px solid var(--white);box-shadow:0 0 0 2px var(--parchment);background:var(--muted);}
+.tl-dot.start{background:var(--green-accent);box-shadow:0 0 0 2px #b5dfc0;}
+.tl-dot.done{background:var(--green-bright);box-shadow:0 0 0 2px #a5d6a7;}
+.tl-type{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sage);margin-bottom:1px;}
+.tl-date{font-size:.67rem;color:var(--muted);margin-bottom:2px;}
+.tl-text{font-size:.82rem;color:var(--ink);}
+
+/* ── PHOTOS ── */
+.photo-section{margin-top:18px;}
+.photo-sec-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;gap:8px;}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:10px;}
+.photo-thumb{position:relative;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--parchment);cursor:pointer;box-shadow:var(--sh);}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .2s;}
+.photo-thumb:active img{transform:scale(1.04);}
+.photo-del{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:99px;width:20px;height:20px;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .13s;}
+.photo-thumb:hover .photo-del,.photo-thumb:focus-within .photo-del{opacity:1;}
+.photo-caption{position:absolute;bottom:0;left:0;right:0;padding:3px 5px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-size:.62rem;line-height:1.2;}
+.upload-zone{border:2px dashed var(--parchment);border-radius:var(--r);padding:18px;text-align:center;color:var(--muted);font-size:.78rem;cursor:pointer;transition:border-color .15s,background .15s;}
+.upload-zone:hover,.upload-zone:active{border-color:var(--mint);background:rgba(168,213,181,.08);}
+
+/* ── LIGHTBOX ── */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:400;align-items:center;justify-content:center;padding:12px;}
+.lightbox.open{display:flex;}
+.lightbox img{max-width:100%;max-height:90vh;border-radius:6px;}
+.lb-close{position:absolute;top:16px;right:18px;color:#fff;font-size:1.6rem;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border-radius:50%;}
+
+/* ── BUTTONS ── */
+.btn{padding:7px 13px;border-radius:var(--r);font-size:.79rem;font-weight:600;cursor:pointer;border:none;transition:opacity .13s,transform .1s;display:inline-flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:var(--green-bright);color:#fff;}
+.btn-primary:hover{opacity:.88;}
+.btn-ghost{background:transparent;border:1px solid var(--parchment);color:var(--slate);}
+.btn-ghost:hover{background:var(--parchment);}
+.btn-danger{background:#fdecea;color:var(--danger);border:1px solid #f5c6c2;}
+.btn-sm{padding:4px 9px;font-size:.72rem;}
+
+/* ── MODAL ── */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(28,58,42,.55);z-index:200;align-items:flex-end;justify-content:center;padding:0;}
+.modal-ov.open{display:flex;}
+@media(min-width:540px){.modal-ov{align-items:center;padding:14px;}}
+.modal{background:var(--white);border-radius:16px 16px 0 0;padding:22px 20px;padding-bottom:calc(22px + var(--safe-bottom));width:100%;max-width:520px;box-shadow:var(--sh-lg);animation:mUp .2s ease;max-height:92vh;overflow-y:auto;}
+@media(min-width:540px){.modal{border-radius:12px;padding:24px;padding-bottom:24px;animation:mIn .17s ease;}}
+@keyframes mUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(6px)}to{opacity:1;transform:none}}
+.modal h3{font-family:Georgia,serif;font-size:1rem;margin-bottom:14px;color:var(--forest);}
+.mfoot{display:flex;justify-content:flex-end;gap:7px;margin-top:16px;}
+.fg{margin-bottom:11px;}
+.fl{display:block;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--slate);margin-bottom:3px;}
+.fi,.fsel,.fta{width:100%;padding:9px 11px;border:1px solid var(--parchment);border-radius:var(--r);font-size:.9rem;font-family:inherit;color:var(--ink);background:var(--cream);transition:border-color .13s;outline:none;-webkit-appearance:none;}
+.fi:focus,.fsel:focus,.fta:focus{border-color:var(--green-accent);}
+.fta{min-height:70px;resize:vertical;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+@media(max-width:400px){.frow{grid-template-columns:1fr;}}
+
+/* ── SIGN IN SCREEN ── */
+.signin-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:32px 24px;text-align:center;}
+.signin-logo{font-size:3.5rem;margin-bottom:16px;}
+.signin-title{font-family:Georgia,serif;font-size:1.6rem;color:var(--forest);margin-bottom:8px;}
+.signin-sub{font-size:.88rem;color:var(--muted);max-width:300px;margin-bottom:28px;line-height:1.5;}
+.google-btn{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid #ddd;border-radius:8px;padding:12px 20px;font-size:.9rem;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--sh);transition:box-shadow .15s;}
+.google-btn:hover{box-shadow:var(--sh-lg);}
+.google-btn svg{width:20px;height:20px;flex-shrink:0;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--forest);color:var(--mint);padding:10px 18px;border-radius:20px;font-size:.82rem;font-weight:600;z-index:500;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── HERO ── */
+.hero{background:var(--forest);border-radius:12px;padding:28px 30px;margin-bottom:20px;color:var(--mint);position:relative;overflow:hidden;}
+.hero::after{content:'🌿';position:absolute;right:20px;bottom:-4px;font-size:4rem;opacity:.15;}
+.hero h1{font-family:Georgia,serif;font-size:1.45rem;margin-bottom:6px;line-height:1.2;}
+.hero h1 span{color:var(--green-accent);}
+.hero p{opacity:.65;font-size:.84rem;max-width:340px;}
+
+.sec-divider{border:none;border-top:1px solid var(--parchment);margin:18px 0;}
+.empty{text-align:center;padding:44px 16px;color:var(--muted);}
+.empty .ei{font-size:2rem;margin-bottom:8px;}
+.empty h3{font-family:Georgia,serif;font-size:.92rem;color:var(--slate);margin-bottom:4px;}
+.empty p{font-size:.78rem;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="brand" onclick="navHome()">🌿 Property <b>Tracker</b></div>
+  </div>
+  <div class="topbar-right" id="topbarRight">
+    <!-- populated after sign-in -->
+  </div>
+</div>
+
+<div class="app-body">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <nav class="sidebar" id="sidebar">
+    <div class="sb-label">Properties</div>
+    <div class="sb-scroll" id="sidebarList"></div>
+    <div class="sb-add" onclick="openModal('addProperty')">+ Add Property</div>
+  </nav>
+  <main class="main" id="mainContent">
+    <!-- Sign-in shown until authenticated -->
+    <div class="signin-screen" id="signinScreen">
+      <div class="signin-logo">🌿</div>
+      <div class="signin-title">Property Tracker</div>
+      <div class="signin-sub">Sign in with Google to sync your data across all your devices.</div>
+      <button class="google-btn" onclick="signIn()">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        Sign in with Google
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modalOv" onclick="closeMIfBg(event)">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lb-close">✕</div>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async></script>
+<script>
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const CLIENT_ID = '796688498724-aggaqg2devkrulr7ifqsmfhontpta3dh.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
+const DATA_FILENAME = 'property-tracker-data.json';
+
+// ── AUTH STATE ────────────────────────────────────────────────────────────────
+let accessToken = null;
+let tokenClient = null;
+let userInfo = null;
+let driveFileId = null;
+
+// ── APP STATE ─────────────────────────────────────────────────────────────────
+let state = null;
+let view = {page:'home',pid:null,uid:null,expImp:null};
+let saving = false;
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+  // Check for stored token
+  const stored = sessionStorage.getItem('pt_token');
+  if (stored) {
+    accessToken = stored;
+    loadUserInfo().then(() => loadFromDrive()).catch(() => showSignIn());
+  }
+});
+
+function showSignIn() {
+  accessToken = null;
+  document.getElementById('signinScreen').style.display = 'flex';
+  document.getElementById('topbarRight').innerHTML = '';
+}
+
+function signIn() {
+  // Initialize token client
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: async (resp) => {
+      if (resp.error) { showToast('Sign in failed'); return; }
+      accessToken = resp.access_token;
+      sessionStorage.setItem('pt_token', accessToken);
+      await loadUserInfo();
+      await loadFromDrive();
+    },
+  });
+  tokenClient.requestAccessToken({prompt: 'consent'});
+}
+
+function signOut() {
+  google.accounts.oauth2.revoke(accessToken, () => {});
+  accessToken = null;
+  sessionStorage.removeItem('pt_token');
+  userInfo = null;
+  driveFileId = null;
+  state = null;
+  showSignIn();
+  renderSidebar();
+  showToast('Signed out');
+}
+
+async function loadUserInfo() {
+  const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!r.ok) throw new Error('auth');
+  userInfo = await r.json();
+  renderTopbarUser();
+}
+
+function renderTopbarUser() {
+  if (!userInfo) return;
+  const initials = (userInfo.given_name||'?')[0].toUpperCase();
+  document.getElementById('topbarRight').innerHTML = `
+    <button class="sync-btn" id="syncBtn" onclick="manualSync()">
+      <span class="sync-icon">↻</span> Sync
+    </button>
+    <div class="user-initial" title="${userInfo.email}\n\nTap to sign out" onclick="if(confirm('Sign out?'))signOut()">${initials}</div>`;
+}
+
+// ── DRIVE ─────────────────────────────────────────────────────────────────────
+async function driveReq(url, opts={}) {
+  const r = await fetch(url, {
+    ...opts,
+    headers: { Authorization: `Bearer ${accessToken}`, ...(opts.headers||{}) }
+  });
+  if (r.status === 401) { showSignIn(); throw new Error('auth'); }
+  return r;
+}
+
+async function findOrCreateFile() {
+  // Search in appDataFolder and root
+  const search = await driveReq(
+    `https://www.googleapis.com/drive/v3/files?q=name='${DATA_FILENAME}' and trashed=false&spaces=drive,appDataFolder&fields=files(id,name)`
+  );
+  const data = await search.json();
+  if (data.files && data.files.length > 0) {
+    driveFileId = data.files[0].id;
+    return false; // existing
+  }
+  // Create new file
+  const meta = { name: DATA_FILENAME, mimeType: 'application/json' };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
+  form.append('file', new Blob([JSON.stringify(seed())], {type:'application/json'}));
+  const cr = await driveReq(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+    { method: 'POST', body: form }
+  );
+  const created = await cr.json();
+  driveFileId = created.id;
+  return true; // new
+}
+
+async function loadFromDrive() {
+  showToast('Loading data…', 99999);
+  try {
+    const isNew = await findOrCreateFile();
+    if (isNew) {
+      state = seed();
+    } else {
+      const r = await driveReq(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
+      state = await r.json();
+      // migrate: ensure all units have photos array and yard exists
+      state.properties.forEach(p => {
+        let hasYard = p.units.some(u => u.isYard);
+        if (!hasYard) p.units.push(makeYard());
+        p.units.forEach(u => {
+          if (!u.photos) u.photos = [];
+          u.improvements.forEach(i => { if (!i.photos) i.photos = []; });
+        });
+      });
+    }
+    hideToast();
+    document.getElementById('signinScreen').style.display = 'none';
+    render();
+    showToast(isNew ? 'New tracker created ✓' : 'Data loaded ✓');
+  } catch(e) {
+    hideToast();
+    if (e.message !== 'auth') showToast('Failed to load data');
+  }
+}
+
+async function saveToDrive() {
+  if (!driveFileId || !accessToken) return;
+  saving = true;
+  setSyncSpinner(true);
+  try {
+    await driveReq(
+      `https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      }
+    );
+    setSyncSpinner(false);
+  } catch(e) {
+    setSyncSpinner(false);
+    showToast('Save failed — check connection');
+  }
+  saving = false;
+}
+
+async function manualSync() {
+  showToast('Syncing…', 99999);
+  await loadFromDrive();
+  hideToast();
+  showToast('Synced ✓');
+}
+
+function setSyncSpinner(on) {
+  const btn = document.getElementById('syncBtn');
+  if (btn) btn.classList.toggle('spinning', on);
+}
+
+let saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToDrive, 800);
+}
+
+// ── SEED DATA ─────────────────────────────────────────────────────────────────
+function uid(){return Math.random().toString(36).slice(2,10);}
+function makeUnit(name,type){return{id:uid(),name,type,improvements:[],photos:[]};}
+function makeYard(){return{id:uid(),name:'Yard',isYard:true,improvements:[],photos:[]};}
+function makeProp(name,address,units){return{id:uid(),name,address,units:[...units,makeYard()]};}
+function seed(){return{properties:[
+  makeProp('1021 Swanson Ln','1021 Swanson Ln, Colfax, CA',[
+    makeUnit('Unit A','Residential'),makeUnit('Unit B','Residential')]),
+  makeProp('20625 You Bet Rd','20625 You Bet Rd, Grass Valley, CA',[
+    makeUnit('Unit A','Residential'),makeUnit('Unit B','Residential'),
+    makeUnit('Unit C','Residential'),makeUnit('Shop','Shop / Outbuilding')]),
+  makeProp('16600 Old Stagecoach Rd','16600 Old Stagecoach Rd (also 16619), Grass Valley, CA',[
+    makeUnit('Unit A','Residential'),makeUnit('Unit B','Residential'),makeUnit('Unit C','Residential')]),
+]};}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render(){renderSidebar();renderMain();}
+
+function renderSidebar(){
+  const el=document.getElementById('sidebarList');
+  if(!state||!state.properties.length){el.innerHTML='<div style="padding:10px 14px;font-size:.76rem;color:#718096;font-style:italic">No properties yet</div>';return;}
+  el.innerHTML=state.properties.map(p=>{
+    const open=view.pid===p.id;
+    return`<div class="prop-item">
+      <div class="prop-hdr ${open?'open active':''}" onclick="navProp('${p.id}')">
+        <span>🏠</span>
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem">${esc(p.name)}</span>
+        <span class="dx" onclick="event.stopPropagation();delProp('${p.id}')">✕</span>
+        <span class="chev">▶</span>
+      </div>
+      <div class="sub-list ${open?'open':''}">
+        ${p.units.map(u=>`
+          <div class="sub-item ${view.uid===u.id?'active':''}" onclick="navUnit('${p.id}','${u.id}');closeSidebarMobile()">
+            <span class="sub-dot"></span>
+            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.isYard?'🌿':''} ${esc(u.name)}</span>
+            ${!u.isYard?`<span class="dx" onclick="event.stopPropagation();delUnit('${p.id}','${u.id}')">✕</span>`:''}
+          </div>`).join('')}
+        <div class="sub-item" onclick="openModal('addUnit','${p.id}')" style="color:var(--green-accent);opacity:.75">
+          <span>+</span><span>Add Unit</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMain(){
+  if(!state){return;}
+  const el=document.getElementById('mainContent');
+  if(view.page==='home'){el.innerHTML=renderHome();return;}
+  if(view.page==='prop'){el.innerHTML=renderPropPage();return;}
+  if(view.page==='unit'){el.innerHTML=renderUnitPage();return;}
+}
+
+function renderHome(){
+  const tu=state.properties.reduce((a,p)=>a+p.units.length,0);
+  const ai=state.properties.flatMap(p=>p.units.flatMap(u=>u.improvements));
+  const cost=ai.reduce((a,i)=>a+(Number(i.cost)||0),0);
+  return`<div class="hero"><h1>Every improvement,<br><span>documented.</span></h1>
+    <p>Track projects across all three properties — units, yards, costs, timelines and photos.</p></div>
+  <div class="stats">
+    <div class="stat"><div class="v">${state.properties.length}</div><div class="l">Properties</div></div>
+    <div class="stat"><div class="v">${tu}</div><div class="l">Units & Yards</div></div>
+    <div class="stat g"><div class="v">${ai.filter(i=>i.status==='active').length}</div><div class="l">Active</div></div>
+    <div class="stat g"><div class="v">${ai.filter(i=>i.status==='done').length}</div><div class="l">Done</div></div>
+    <div class="stat gold"><div class="v">$${cost.toLocaleString()}</div><div class="l">Invested</div></div>
+  </div>
+  <div class="card-grid">${state.properties.map(p=>{
+    const im=p.units.flatMap(u=>u.improvements);
+    const d=im.filter(i=>i.status==='done').length;
+    const pct=im.length?Math.round(d/im.length*100):0;
+    return`<div class="card" onclick="navProp('${p.id}')">
+      <div class="cn">🏠 ${esc(p.name)}</div>
+      <div class="cm">${esc(p.address)}</div>
+      <div class="cpll"><span>${im.length} improvements</span><span>${im.filter(i=>i.status==='active').length} active</span></div>
+      <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+    </div>`;}).join('')}</div>`;
+}
+
+function renderPropPage(){
+  const p=state.properties.find(x=>x.id===view.pid);
+  if(!p)return'<p>Not found.</p>';
+  const im=p.units.flatMap(u=>u.improvements);
+  const cost=im.reduce((a,i)=>a+(Number(i.cost)||0),0);
+  const units=p.units.filter(u=>!u.isYard);
+  const yard=p.units.find(u=>u.isYard);
+  return`<div class="bc"><span class="crumb" onclick="navHome()">Home</span><span class="sep">/</span><span>${esc(p.name)}</span></div>
+  <div class="pg-hdr">
+    <div><div class="pg-title">🏠 ${esc(p.name)}</div><div class="pg-sub">${esc(p.address)}</div></div>
+    <div class="hdr-btns">
+      <button class="btn btn-ghost btn-sm" onclick="openModal('editProp','${p.id}')">✏️ Edit</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('addUnit','${p.id}')">+ Unit</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="v">${units.length}</div><div class="l">Units</div></div>
+    <div class="stat g"><div class="v">${im.filter(i=>i.status==='active').length}</div><div class="l">Active</div></div>
+    <div class="stat g"><div class="v">${im.filter(i=>i.status==='done').length}</div><div class="l">Done</div></div>
+    <div class="stat gold"><div class="v">$${cost.toLocaleString()}</div><div class="l">Invested</div></div>
+  </div>
+  <div class="imp-hdr-row"><h2>Units</h2></div>
+  <div class="card-grid">
+    ${units.map(u=>{const im=u.improvements;const d=im.filter(i=>i.status==='done').length;const pct=im.length?Math.round(d/im.length*100):0;
+      return`<div class="card" onclick="navUnit('${p.id}','${u.id}')">
+        <div class="cn">🚪 ${esc(u.name)}</div><div class="cm">${esc(u.type)}</div>
+        <div class="cpll"><span>${im.length} projects</span><span>${pct}% done</span></div>
+        <div class="pbar"><div class="pfill ${pct===100?'done':''}" style="width:${pct}%"></div></div>
+      </div>`;}).join('')}
+    ${yard?`<div class="card yard-card" onclick="navUnit('${p.id}','${yard.id}')">
+      <div class="cn">🌿 Yard</div><div class="cm">Grounds &amp; landscaping</div>
+      <div class="cpll"><span>${yard.improvements.length} projects</span><span>${(yard.photos||[]).length} photos</span></div>
+      <div class="pbar"><div class="pfill" style="width:${yard.improvements.length?Math.round(yard.improvements.filter(i=>i.status==='done').length/yard.improvements.length*100):0}%"></div></div>
+    </div>`:''}
+  </div>`;
+}
+
+function renderUnitPage(){
+  const p=state.properties.find(x=>x.id===view.pid);
+  const u=p&&p.units.find(x=>x.id===view.uid);
+  if(!p||!u)return'<p>Not found.</p>';
+  const icon=u.isYard?'🌿':'🚪';
+  const cost=u.improvements.reduce((a,i)=>a+(Number(i.cost)||0),0);
+  const photos=u.photos||[];
+  return`<div class="bc">
+    <span class="crumb" onclick="navHome()">Home</span><span class="sep">/</span>
+    <span class="crumb" onclick="navProp('${p.id}')">${esc(p.name)}</span><span class="sep">/</span>
+    <span>${icon} ${esc(u.name)}</span>
+  </div>
+  <div class="pg-hdr">
+    <div><div class="pg-title">${icon} ${esc(u.name)}</div>
+    <div class="pg-sub">${esc(p.name)}${!u.isYard?' &bull; '+esc(u.type):''}</div></div>
+    <div class="hdr-btns">
+      ${!u.isYard?`<button class="btn btn-ghost btn-sm" onclick="openModal('editUnit','${p.id}','${u.id}')">✏️ Edit</button>`:''}
+      <button class="btn btn-primary btn-sm" onclick="openModal('addImp','${p.id}','${u.id}')">+ Project</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="v">${u.improvements.length}</div><div class="l">Projects</div></div>
+    <div class="stat g"><div class="v">${u.improvements.filter(i=>i.status==='active').length}</div><div class="l">Active</div></div>
+    <div class="stat g"><div class="v">${u.improvements.filter(i=>i.status==='done').length}</div><div class="l">Done</div></div>
+    <div class="stat gold"><div class="v">$${cost.toLocaleString()}</div><div class="l">Cost</div></div>
+    <div class="stat"><div class="v">${photos.length}</div><div class="l">Photos</div></div>
+  </div>
+
+  <div class="photo-section">
+    <div class="photo-sec-title">📷 Photos
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('pu_${u.id}').click()">+ Add</button>
+      <input type="file" id="pu_${u.id}" accept="image/*" multiple style="display:none" onchange="handleUnitPhoto(event,'${p.id}','${u.id}')">
+    </div>
+    ${photos.length?`<div class="photo-grid">${photos.map((ph,i)=>`
+      <div class="photo-thumb" onclick="openLightbox('${ph.data}')">
+        <img src="${ph.data}" alt="">
+        ${ph.caption?`<div class="photo-caption">${esc(ph.caption)}</div>`:''}
+        <button class="photo-del" onclick="event.stopPropagation();delUnitPhoto('${p.id}','${u.id}',${i})">✕</button>
+      </div>`).join('')}</div>`
+    :`<div class="upload-zone" onclick="document.getElementById('pu_${u.id}').click()">
+      <div style="font-size:1.6rem;margin-bottom:5px">📷</div>
+      <div>Tap to add photos</div>
+      <div style="font-size:.7rem;margin-top:2px;opacity:.6">Before, during &amp; after shots</div>
+    </div>`}
+  </div>
+  <hr class="sec-divider">
+  <div class="imp-hdr-row"><h2>${u.isYard?'Yard ':''}Projects</h2></div>
+  ${!u.improvements.length?`<div class="empty"><div class="ei">${u.isYard?'🌱':'🔨'}</div><h3>No projects yet</h3><p>Tap "+ Project" to log your first improvement.</p></div>`:''}
+  ${u.improvements.map(imp=>renderImpCard(p.id,u.id,imp)).join('')}`;
+}
+
+function renderImpCard(pid,uid2,imp){
+  const exp=view.expImp===imp.id;
+  const bc={planned:'b-planned',active:'b-active',done:'b-done',paused:'b-paused'}[imp.status]||'b-planned';
+  const cs=imp.cost?'$'+Number(imp.cost).toLocaleString():'—';
+  const log=imp.log||[];
+  const photos=imp.photos||[];
+  return`<div class="imp-card ${exp?'expanded':''}" id="ic_${imp.id}">
+    <div class="imp-ch" onclick="togImp('${imp.id}')">
+      <span class="badge ${bc}">${imp.status.toUpperCase()}</span>
+      <span class="imp-title">${esc(imp.title)}</span>
+      <span class="imp-cost">${cs}</span>
+      <span class="imp-tog">▼</span>
+    </div>
+    <div class="imp-body">
+      <div class="meta-grid">
+        <div><div class="ml">Category</div><div class="mv">${esc(imp.category||'—')}</div></div>
+        <div><div class="ml">Contractor</div><div class="mv">${esc(imp.contractor||'—')}</div></div>
+        <div><div class="ml">Start</div><div class="mv">${imp.startDate||'—'}</div></div>
+        <div><div class="ml">End</div><div class="mv">${imp.endDate||'Ongoing'}</div></div>
+      </div>
+      ${imp.notes?`<div class="notes-box">${esc(imp.notes)}</div>`:''}
+      <div class="photo-sec-title" style="margin-bottom:8px">📷 Project Photos
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ip_${imp.id}').click()">+ Add</button>
+        <input type="file" id="ip_${imp.id}" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,'${pid}','${uid2}','${imp.id}')">
+      </div>
+      ${photos.length?`<div class="photo-grid" style="margin-bottom:12px">${photos.map((ph,i)=>`
+        <div class="photo-thumb" onclick="openLightbox('${ph.data}')">
+          <img src="${ph.data}" alt="">
+          <button class="photo-del" onclick="event.stopPropagation();delImpPhoto('${pid}','${uid2}','${imp.id}',${i})">✕</button>
+        </div>`).join('')}</div>`:'<p style="font-size:.76rem;color:var(--muted);font-style:italic;margin-bottom:12px">No project photos yet.</p>'}
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+        <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Timeline</span>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-ghost btn-sm" onclick="openModal('addLog','${pid}','${uid2}','${imp.id}')">+ Entry</button>
+          <button class="btn btn-ghost btn-sm" onclick="openModal('editImp','${pid}','${uid2}','${imp.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="delImp('${pid}','${uid2}','${imp.id}')">✕</button>
+        </div>
+      </div>
+      ${log.length?`<div class="tl">${log.map(e=>`
+        <div class="tl-entry">
+          <div class="tl-dot ${e.type}"></div>
+          <div class="tl-type">${e.type==='start'?'🚀 Start':e.type==='done'?'✅ Done':'📝 Update'}</div>
+          <div class="tl-date">${e.date}</div>
+          <div class="tl-text">${esc(e.text)}</div>
+        </div>`).join('')}</div>`:'<p style="font-size:.77rem;color:var(--muted);font-style:italic">No entries yet.</p>'}
+    </div>
+  </div>`;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function navHome(){view={page:'home',pid:null,uid:null,expImp:null};render();scrollTop();}
+function navProp(pid){view={page:'prop',pid,uid:null,expImp:null};render();scrollTop();}
+function navUnit(pid,uid2){view={page:'unit',pid,uid:uid2,expImp:null};render();scrollTop();}
+function togImp(id){view.expImp=view.expImp===id?null:id;renderMain();}
+function scrollTop(){document.getElementById('mainContent').scrollTop=0;}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebarMobile(){
+  if(window.innerWidth<=680){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+}
+
+// ── PHOTOS ────────────────────────────────────────────────────────────────────
+function compressImage(dataUrl,maxW,cb){
+  const img=new Image();
+  img.onload=()=>{
+    const scale=Math.min(1,maxW/img.width);
+    const c=document.createElement('canvas');
+    c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    cb(c.toDataURL('image/jpeg',0.75));
+  };img.src=dataUrl;
+}
+
+function processFiles(files,cb){
+  let done=0,results=[];
+  [...files].forEach((file,i)=>{
+    const r=new FileReader();
+    r.onload=e=>{
+      compressImage(e.target.result,1000,ph=>{
+        results[i]=ph;done++;
+        if(done===files.length)cb(results);
+      });
+    };r.readAsDataURL(file);
+  });
+}
+
+function handleUnitPhoto(event,pid,uid2){
+  processFiles(event.target.files,photos=>{
+    const p=state.properties.find(x=>x.id===pid);
+    const u=p.units.find(x=>x.id===uid2);
+    photos.forEach(d=>u.photos.push({id:uid(),data:d,caption:'',date:today()}));
+    save();renderMain();
+  });event.target.value='';
+}
+
+function handleImpPhoto(event,pid,uid2,impId){
+  processFiles(event.target.files,photos=>{
+    const p=state.properties.find(x=>x.id===pid);
+    const u=p.units.find(x=>x.id===uid2);
+    const imp=u.improvements.find(x=>x.id===impId);
+    photos.forEach(d=>imp.photos.push({id:uid(),data:d,caption:'',date:today()}));
+    save();view.expImp=impId;renderMain();
+  });event.target.value='';
+}
+
+function delUnitPhoto(pid,uid2,idx){
+  if(!confirm('Remove photo?'))return;
+  const p=state.properties.find(x=>x.id===pid);
+  const u=p.units.find(x=>x.id===uid2);
+  u.photos.splice(idx,1);save();renderMain();
+}
+function delImpPhoto(pid,uid2,impId,idx){
+  if(!confirm('Remove photo?'))return;
+  const p=state.properties.find(x=>x.id===pid);
+  const u=p.units.find(x=>x.id===uid2);
+  const imp=u.improvements.find(x=>x.id===impId);
+  imp.photos.splice(idx,1);save();view.expImp=impId;renderMain();
+}
+
+function openLightbox(src){document.getElementById('lbImg').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+
+// ── MODALS ────────────────────────────────────────────────────────────────────
+const CATS=['General','Kitchen','Bathroom','Flooring','Electrical','Plumbing','HVAC','Painting','Exterior','Roofing','Windows & Doors','Landscaping','Fencing','Irrigation','Pest Control','Other'];
+const STATUSES=['planned','active','paused','done'];
+
+function openModal(type,...args){
+  document.getElementById('modalBox').innerHTML=buildModal(type,...args);
+  document.getElementById('modalOv').classList.add('open');
+  setTimeout(()=>{const f=document.querySelector('.modal .fi');if(f)f.focus();},100);
+}
+function closeModal(){document.getElementById('modalOv').classList.remove('open');}
+function closeMIfBg(e){if(e.target===document.getElementById('modalOv'))closeModal();}
+
+function buildModal(type,...a){
+  if(type==='addProperty')return`<h3>Add Property</h3>
+    <div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" placeholder="e.g. 123 Main St"></div>
+    <div class="fg"><label class="fl">Address</label><input class="fi" id="m1" placeholder="Full address"></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddProp()">Add</button></div>`;
+
+  if(type==='editProp'){const p=state.properties.find(x=>x.id===a[0]);return`<h3>Edit Property</h3>
+    <div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="${esc(p.name)}"></div>
+    <div class="fg"><label class="fl">Address</label><input class="fi" id="m1" value="${esc(p.address)}"></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subEditProp('${p.id}')">Save</button></div>`;}
+
+  if(type==='addUnit')return`<h3>Add Unit</h3>
+    <div class="frow">
+      <div class="fg"><label class="fl">Unit Name *</label><input class="fi" id="m0" placeholder="e.g. Unit D"></div>
+      <div class="fg"><label class="fl">Type</label><input class="fi" id="m1" placeholder="e.g. 2 Bed / 1 Bath"></div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddUnit('${a[0]}')">Add Unit</button></div>`;
+
+  if(type==='editUnit'){const p=state.properties.find(x=>x.id===a[0]);const u=p.units.find(x=>x.id===a[1]);return`<h3>Edit Unit</h3>
+    <div class="frow">
+      <div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="${esc(u.name)}"></div>
+      <div class="fg"><label class="fl">Type</label><input class="fi" id="m1" value="${esc(u.type)}"></div>
+    </div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subEditUnit('${a[0]}','${a[1]}')">Save</button></div>`;}
+
+  if(type==='addImp')return`<h3>Log Project</h3>
+    <div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" placeholder="e.g. Replace water heater"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Status</label><select class="fsel" id="m2">${STATUSES.map(s=>`<option value="${s}" ${s==='active'?'selected':''}>${cap(s)}</option>`).join('')}</select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Contractor</label><input class="fi" id="m3" placeholder="Name or company"></div>
+      <div class="fg"><label class="fl">Cost ($)</label><input class="fi" id="m4" type="number" placeholder="0"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Start Date</label><input class="fi" id="m5" type="date"></div>
+      <div class="fg"><label class="fl">End Date</label><input class="fi" id="m6" type="date"></div>
+    </div>
+    <div class="fg"><label class="fl">Notes / Scope</label><textarea class="fta" id="m7" placeholder="Describe the work..."></textarea></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddImp('${a[0]}','${a[1]}')">Log Project</button></div>`;
+
+  if(type==='editImp'){
+    const p=state.properties.find(x=>x.id===a[0]);const u=p.units.find(x=>x.id===a[1]);const imp=u.improvements.find(x=>x.id===a[2]);
+    return`<h3>Edit Project</h3>
+    <div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="${esc(imp.title)}"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">${CATS.map(c=>`<option ${c===imp.category?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Status</label><select class="fsel" id="m2">${STATUSES.map(s=>`<option value="${s}" ${s===imp.status?'selected':''}>${cap(s)}</option>`).join('')}</select></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Contractor</label><input class="fi" id="m3" value="${esc(imp.contractor||'')}"></div>
+      <div class="fg"><label class="fl">Cost ($)</label><input class="fi" id="m4" type="number" value="${imp.cost||''}"></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Start Date</label><input class="fi" id="m5" type="date" value="${imp.startDate||''}"></div>
+      <div class="fg"><label class="fl">End Date</label><input class="fi" id="m6" type="date" value="${imp.endDate||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m7">${esc(imp.notes||'')}</textarea></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subEditImp('${a[0]}','${a[1]}','${a[2]}')">Save</button></div>`;}
+
+  if(type==='addLog')return`<h3>Add Timeline Entry</h3>
+    <div class="frow">
+      <div class="fg"><label class="fl">Date</label><input class="fi" id="m0" type="date" value="${today()}"></div>
+      <div class="fg"><label class="fl">Type</label><select class="fsel" id="m1">
+        <option value="note">📝 Update</option>
+        <option value="start">🚀 Start</option>
+        <option value="done">✅ Completion</option>
+      </select></div>
+    </div>
+    <div class="fg"><label class="fl">Description *</label><textarea class="fta" id="m2" placeholder="What happened or was completed?"></textarea></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddLog('${a[0]}','${a[1]}','${a[2]}')">Add</button></div>`;
+
+  return'<p>Unknown modal.</p>';
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+function v(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function today(){return new Date().toISOString().slice(0,10);}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+
+function subAddProp(){const n=v('m0');if(!n)return alert('Name required.');
+  state.properties.push(makeProp(n,v('m1'),[]));save();closeModal();render();}
+function subEditProp(pid){const n=v('m0');if(!n)return alert('Name required.');
+  const p=state.properties.find(x=>x.id===pid);p.name=n;p.address=v('m1');save();closeModal();render();}
+function subAddUnit(pid){const n=v('m0');if(!n)return alert('Unit name required.');
+  const p=state.properties.find(x=>x.id===pid);
+  const yi=p.units.findIndex(u=>u.isYard);
+  const nu=makeUnit(n,v('m1'));
+  if(yi>=0)p.units.splice(yi,0,nu);else p.units.push(nu);
+  save();closeModal();render();}
+function subEditUnit(pid,uid2){const n=v('m0');if(!n)return alert('Name required.');
+  const p=state.properties.find(x=>x.id===pid);const u=p.units.find(x=>x.id===uid2);
+  u.name=n;u.type=v('m1');save();closeModal();render();}
+function subAddImp(pid,uid2){const t=v('m0');if(!t)return alert('Title required.');
+  const p=state.properties.find(x=>x.id===pid);const u=p.units.find(x=>x.id===uid2);
+  u.improvements.push({id:uid(),title:t,category:v('m1'),status:v('m2'),contractor:v('m3'),cost:v('m4'),startDate:v('m5'),endDate:v('m6'),notes:v('m7'),log:[],photos:[]});
+  save();closeModal();render();}
+function subEditImp(pid,uid2,impId){const t=v('m0');if(!t)return alert('Title required.');
+  const p=state.properties.find(x=>x.id===pid);const u=p.units.find(x=>x.id===uid2);const imp=u.improvements.find(x=>x.id===impId);
+  Object.assign(imp,{title:t,category:v('m1'),status:v('m2'),contractor:v('m3'),cost:v('m4'),startDate:v('m5'),endDate:v('m6'),notes:v('m7')});
+  save();closeModal();view.expImp=impId;render();}
+function subAddLog(pid,uid2,impId){const t=v('m2');if(!t)return alert('Description required.');
+  const p=state.properties.find(x=>x.id===pid);const u=p.units.find(x=>x.id===uid2);const imp=u.improvements.find(x=>x.id===impId);
+  if(!imp.log)imp.log=[];
+  imp.log.push({id:uid(),date:v('m0')||today(),type:v('m1'),text:t});
+  imp.log.sort((a,b)=>a.date.localeCompare(b.date));
+  save();closeModal();view.expImp=impId;render();}
+
+// ── DELETE ────────────────────────────────────────────────────────────────────
+function delProp(pid){if(!confirm('Delete this property and everything in it?'))return;
+  state.properties=state.properties.filter(x=>x.id!==pid);
+  if(view.pid===pid)navHome();save();}
+function delUnit(pid,uid2){if(!confirm('Delete this unit?'))return;
+  const p=state.properties.find(x=>x.id===pid);p.units=p.units.filter(x=>x.id!==uid2);
+  if(view.uid===uid2)navProp(pid);save();}
+function delImp(pid,uid2,impId){if(!confirm('Delete this project?'))return;
+  const p=state.properties.find(x=>x.id===pid);const u=p.units.find(x=>x.id===uid2);
+  u.improvements=u.improvements.filter(x=>x.id!==impId);save();render();}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer=null;
+function showToast(msg,dur=2500){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);if(dur<99999)toastTimer=setTimeout(hideToast,dur);
+}
+function hideToast(){const t=document.getElementById('toast');t.classList.remove('show');}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
