@@ -33,10 +33,7 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;overscroll-behavior:none;}
-
-/* ── TOPBAR ── */
 .topbar{background:var(--forest);color:var(--mint);padding:0 16px;padding-top:var(--safe-top);height:calc(54px + var(--safe-top));display:flex;align-items:flex-end;padding-bottom:10px;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);flex-shrink:0;}
 .brand{display:flex;align-items:center;gap:8px;font-family:Georgia,serif;font-size:1.05rem;font-weight:bold;cursor:pointer;user-select:none;}
 .brand b{color:var(--green-accent);}
@@ -47,11 +44,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 @keyframes spin{to{transform:rotate(360deg)}}
 .user-avatar{width:30px;height:30px;border-radius:50%;border:2px solid var(--mint);object-fit:cover;cursor:pointer;}
 .user-initial{width:30px;height:30px;border-radius:50%;background:var(--forest-light);border:2px solid var(--mint);color:var(--mint);font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;}
-
-/* ── LAYOUT ── */
 .app-body{display:flex;flex:1;height:calc(100vh - 54px - var(--safe-top));overflow:hidden;}
-
-/* ── SIDEBAR ── */
 .sidebar{width:255px;background:var(--forest-mid);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;transition:transform .25s ease;}
 @media(max-width:680px){
   .sidebar{position:fixed;top:calc(54px + var(--safe-top));bottom:0;left:0;z-index:90;transform:translateX(-100%);width:80vw;max-width:280px;}
@@ -81,39 +74,27 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .sub-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
 .sb-add{margin:8px 10px 12px;padding:8px;background:rgba(90,171,110,.12);border:1px dashed rgba(90,171,110,.35);border-radius:var(--r);color:var(--green-accent);font-size:.78rem;cursor:pointer;text-align:center;transition:background .13s;}
 .sb-add:hover{background:rgba(90,171,110,.22);}
-
-/* hamburger */
 .hamburger{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:4px;}
 @media(max-width:680px){.hamburger{display:flex;}}
 .hamburger span{width:20px;height:2px;background:var(--mint);border-radius:2px;transition:all .2s;}
-
-/* ── MAIN ── */
 .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 24px;min-width:0;}
 .main::-webkit-scrollbar{width:4px;}
 .main::-webkit-scrollbar-thumb{background:var(--parchment);border-radius:4px;}
 @media(max-width:680px){.main{padding:16px 14px;}}
-
-/* ── BREADCRUMB ── */
 .bc{font-size:.73rem;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
 .bc .crumb{cursor:pointer;transition:color .12s;}
 .bc .crumb:hover{color:var(--green-bright);}
 .bc .sep{opacity:.4;}
-
-/* ── PAGE HEADER ── */
 .pg-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:10px;flex-wrap:wrap;}
 .pg-title{font-family:Georgia,serif;font-size:1.5rem;font-weight:bold;color:var(--forest);line-height:1.15;}
 .pg-sub{font-size:.8rem;color:var(--muted);margin-top:3px;}
 .hdr-btns{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}
-
-/* ── STATS ── */
 .stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
 .stat{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);padding:10px 14px;min-width:80px;box-shadow:var(--sh);}
 .stat .v{font-size:1.25rem;font-weight:700;font-family:Georgia,serif;color:var(--forest);line-height:1;}
 .stat .l{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
 .stat.g .v{color:var(--green-bright);}
 .stat.gold .v{color:var(--gold);}
-
-/* ── CARD GRID ── */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px;}
 .card{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);padding:14px;cursor:pointer;transition:box-shadow .13s,transform .1s,border-color .13s;box-shadow:var(--sh);position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent;}
 .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--parchment);transition:background .18s;}
@@ -126,8 +107,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .pbar{height:4px;background:var(--parchment);border-radius:99px;overflow:hidden;}
 .pfill{height:100%;background:var(--green-accent);border-radius:99px;transition:width .4s;}
 .pfill.done{background:var(--green-bright);}
-
-/* ── IMPROVEMENT CARDS ── */
 .imp-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
 .imp-hdr-row h2{font-family:Georgia,serif;font-size:1.05rem;color:var(--forest);}
 .imp-card{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sh);overflow:hidden;}
@@ -148,8 +127,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .ml{font-size:.63rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1px;}
 .mv{font-size:.83rem;font-weight:600;color:var(--ink);}
 .notes-box{background:var(--parchment);border-left:3px solid var(--green-accent);border-radius:0 6px 6px 0;padding:9px 12px;font-size:.82rem;color:var(--slate);margin-bottom:14px;line-height:1.5;}
-
-/* ── TIMELINE ── */
 .tl{position:relative;padding-left:24px;}
 .tl::before{content:'';position:absolute;left:6px;top:8px;bottom:0;width:2px;background:var(--parchment);}
 .tl-entry{position:relative;margin-bottom:16px;}
@@ -160,8 +137,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .tl-type{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sage);margin-bottom:1px;}
 .tl-date{font-size:.67rem;color:var(--muted);margin-bottom:2px;}
 .tl-text{font-size:.82rem;color:var(--ink);}
-
-/* ── PHOTOS ── */
 .photo-section{margin-top:18px;}
 .photo-sec-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;gap:8px;}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:10px;}
@@ -173,14 +148,10 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .photo-caption{position:absolute;bottom:0;left:0;right:0;padding:3px 5px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff;font-size:.62rem;line-height:1.2;}
 .upload-zone{border:2px dashed var(--parchment);border-radius:var(--r);padding:18px;text-align:center;color:var(--muted);font-size:.78rem;cursor:pointer;transition:border-color .15s,background .15s;}
 .upload-zone:hover,.upload-zone:active{border-color:var(--mint);background:rgba(168,213,181,.08);}
-
-/* ── LIGHTBOX ── */
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:400;align-items:center;justify-content:center;padding:12px;}
 .lightbox.open{display:flex;}
 .lightbox img{max-width:100%;max-height:90vh;border-radius:6px;}
 .lb-close{position:absolute;top:16px;right:18px;color:#fff;font-size:1.6rem;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border-radius:50%;}
-
-/* ── BUTTONS ── */
 .btn{padding:7px 13px;border-radius:var(--r);font-size:.79rem;font-weight:600;cursor:pointer;border:none;transition:opacity .13s,transform .1s;display:inline-flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 .btn:active{transform:scale(.96);}
 .btn-primary{background:var(--green-bright);color:#fff;}
@@ -189,8 +160,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .btn-ghost:hover{background:var(--parchment);}
 .btn-danger{background:#fdecea;color:var(--danger);border:1px solid #f5c6c2;}
 .btn-sm{padding:4px 9px;font-size:.72rem;}
-
-/* ── MODAL ── */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(28,58,42,.55);z-index:200;align-items:flex-end;justify-content:center;padding:0;}
 .modal-ov.open{display:flex;}
 @media(min-width:540px){.modal-ov{align-items:center;padding:14px;}}
@@ -207,8 +176,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .fta{min-height:70px;resize:vertical;}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
 @media(max-width:400px){.frow{grid-template-columns:1fr;}}
-
-/* ── SIGN IN SCREEN ── */
 .signin-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:32px 24px;text-align:center;}
 .signin-logo{font-size:3.5rem;margin-bottom:16px;}
 .signin-title{font-family:Georgia,serif;font-size:1.6rem;color:var(--forest);margin-bottom:8px;}
@@ -216,18 +183,13 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .google-btn{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid #ddd;border-radius:8px;padding:12px 20px;font-size:.9rem;font-weight:600;color:var(--ink);cursor:pointer;box-shadow:var(--sh);transition:box-shadow .15s;}
 .google-btn:hover{box-shadow:var(--sh-lg);}
 .google-btn svg{width:20px;height:20px;flex-shrink:0;}
-
-/* ── TOAST ── */
 .toast{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--forest);color:var(--mint);padding:10px 18px;border-radius:20px;font-size:.82rem;font-weight:600;z-index:500;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ── HERO ── */
 .hero{background:var(--forest);border-radius:12px;padding:28px 30px;margin-bottom:20px;color:var(--mint);position:relative;overflow:hidden;}
 .hero::after{content:'🌿';position:absolute;right:20px;bottom:-4px;font-size:4rem;opacity:.15;}
 .hero h1{font-family:Georgia,serif;font-size:1.45rem;margin-bottom:6px;line-height:1.2;}
 .hero h1 span{color:var(--green-accent);}
 .hero p{opacity:.65;font-size:.84rem;max-width:340px;}
-
 .sec-divider{border:none;border-top:1px solid var(--parchment);margin:18px 0;}
 .empty{text-align:center;padding:44px 16px;color:var(--muted);}
 .empty .ei{font-size:2rem;margin-bottom:8px;}
@@ -236,7 +198,6 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 </style>
 </head>
 <body>
-
 <!-- TOPBAR -->
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:10px">
@@ -288,8 +249,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async></script>
 <script>
-
 // ── CONFIG ────────────────────────────────────────────────────────────────────
+const CLIENT_ID = '333447421312-7oet5oinel4tp8jeed3tgb4ueq1fmfvd.apps.googleusercontent.com';
 const SCOPES = 'openid profile email https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file';
 const DATA_FILENAME = 'property-tracker-data.json';
 
@@ -309,7 +270,6 @@ window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
-  // Check for stored token with expiry
   const stored = localStorage.getItem('pt_token');
   const expiry = localStorage.getItem('pt_token_expiry');
   const valid = stored && expiry && Date.now() < Number(expiry);
@@ -337,7 +297,6 @@ function signIn() {
       if (resp.error) { showToast('Sign in failed: ' + (resp.error||'')); return; }
       if (!resp.access_token) { showToast('No token received'); return; }
       accessToken = resp.access_token;
-      // Store with expiry
       const expiry = Date.now() + (resp.expires_in || 3600) * 1000;
       localStorage.setItem('pt_token', accessToken);
       localStorage.setItem('pt_token_expiry', expiry);
@@ -395,16 +354,14 @@ async function driveReq(url, opts={}) {
 }
 
 async function findOrCreateFile() {
-  // Search in appDataFolder and root
   const search = await driveReq(
     `https://www.googleapis.com/drive/v3/files?q=name='${DATA_FILENAME}' and trashed=false&spaces=drive,appDataFolder&fields=files(id,name)`
   );
   const data = await search.json();
   if (data.files && data.files.length > 0) {
     driveFileId = data.files[0].id;
-    return false; // existing
+    return false;
   }
-  // Create new file
   const meta = { name: DATA_FILENAME, mimeType: 'application/json' };
   const form = new FormData();
   form.append('metadata', new Blob([JSON.stringify(meta)], {type:'application/json'}));
@@ -415,7 +372,7 @@ async function findOrCreateFile() {
   );
   const created = await cr.json();
   driveFileId = created.id;
-  return true; // new
+  return true;
 }
 
 async function loadFromDrive() {
@@ -427,7 +384,6 @@ async function loadFromDrive() {
     } else {
       const r = await driveReq(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
       state = await r.json();
-      // migrate: ensure all units have photos array and yard exists
       state.properties.forEach(p => {
         let hasYard = p.units.some(u => u.isYard);
         if (!hasYard) p.units.push(makeYard());
@@ -485,7 +441,6 @@ function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveToDrive, 800);
 }
-
 // ── SEED DATA ─────────────────────────────────────────────────────────────────
 function uid(){return Math.random().toString(36).slice(2,10);}
 function makeUnit(name,type){return{id:uid(),name,type,improvements:[],photos:[]};}
@@ -509,7 +464,7 @@ function renderSidebar(){
   if(!state||!state.properties.length){el.innerHTML='<div style="padding:10px 14px;font-size:.76rem;color:#718096;font-style:italic">No properties yet</div>';return;}
   el.innerHTML=state.properties.map(p=>{
     const open=view.pid===p.id;
-    return`<div class="prop-item">
+    return `<div class="prop-item">
       <div class="prop-hdr ${open?'open active':''}" onclick="navProp('${p.id}')">
         <span>🏠</span>
         <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem">${esc(p.name)}</span>
@@ -521,7 +476,7 @@ function renderSidebar(){
           <div class="sub-item ${view.uid===u.id?'active':''}" onclick="navUnit('${p.id}','${u.id}');closeSidebarMobile()">
             <span class="sub-dot"></span>
             <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${u.isYard?'🌿':''} ${esc(u.name)}</span>
-            ${!u.isYard?`<span class="dx" onclick="event.stopPropagation();delUnit('${p.id}','${u.id}')">✕</span>`:''}
+            ${!u.isYard?'<span class="dx" onclick="event.stopPropagation();delUnit(\''+p.id+'\',' +'\''+u.id+'\')"  >✕</span>':''}
           </div>`).join('')}
         <div class="sub-item" onclick="openModal('addUnit','${p.id}')" style="color:var(--green-accent);opacity:.75">
           <span>+</span><span>Add Unit</span>
@@ -543,11 +498,11 @@ function renderHome(){
   const tu=state.properties.reduce((a,p)=>a+p.units.length,0);
   const ai=state.properties.flatMap(p=>p.units.flatMap(u=>u.improvements));
   const cost=ai.reduce((a,i)=>a+(Number(i.cost)||0),0);
-  return`<div class="hero"><h1>Every improvement,<br><span>documented.</span></h1>
+  return `<div class="hero"><h1>Every improvement,<br><span>documented.</span></h1>
     <p>Track projects across all three properties — units, yards, costs, timelines and photos.</p></div>
   <div class="stats">
     <div class="stat"><div class="v">${state.properties.length}</div><div class="l">Properties</div></div>
-    <div class="stat"><div class="v">${tu}</div><div class="l">Units & Yards</div></div>
+    <div class="stat"><div class="v">${tu}</div><div class="l">Units &amp; Yards</div></div>
     <div class="stat g"><div class="v">${ai.filter(i=>i.status==='active').length}</div><div class="l">Active</div></div>
     <div class="stat g"><div class="v">${ai.filter(i=>i.status==='done').length}</div><div class="l">Done</div></div>
     <div class="stat gold"><div class="v">$${cost.toLocaleString()}</div><div class="l">Invested</div></div>
@@ -556,7 +511,7 @@ function renderHome(){
     const im=p.units.flatMap(u=>u.improvements);
     const d=im.filter(i=>i.status==='done').length;
     const pct=im.length?Math.round(d/im.length*100):0;
-    return`<div class="card" onclick="navProp('${p.id}')">
+    return `<div class="card" onclick="navProp('${p.id}')">
       <div class="cn">🏠 ${esc(p.name)}</div>
       <div class="cm">${esc(p.address)}</div>
       <div class="cpll"><span>${im.length} improvements</span><span>${im.filter(i=>i.status==='active').length} active</span></div>
@@ -571,7 +526,7 @@ function renderPropPage(){
   const cost=im.reduce((a,i)=>a+(Number(i.cost)||0),0);
   const units=p.units.filter(u=>!u.isYard);
   const yard=p.units.find(u=>u.isYard);
-  return`<div class="bc"><span class="crumb" onclick="navHome()">Home</span><span class="sep">/</span><span>${esc(p.name)}</span></div>
+  return `<div class="bc"><span class="crumb" onclick="navHome()">Home</span><span class="sep">/</span><span>${esc(p.name)}</span></div>
   <div class="pg-hdr">
     <div><div class="pg-title">🏠 ${esc(p.name)}</div><div class="pg-sub">${esc(p.address)}</div></div>
     <div class="hdr-btns">
@@ -588,7 +543,7 @@ function renderPropPage(){
   <div class="imp-hdr-row"><h2>Units</h2></div>
   <div class="card-grid">
     ${units.map(u=>{const im=u.improvements;const d=im.filter(i=>i.status==='done').length;const pct=im.length?Math.round(d/im.length*100):0;
-      return`<div class="card" onclick="navUnit('${p.id}','${u.id}')">
+      return `<div class="card" onclick="navUnit('${p.id}','${u.id}')">
         <div class="cn">🚪 ${esc(u.name)}</div><div class="cm">${esc(u.type)}</div>
         <div class="cpll"><span>${im.length} projects</span><span>${pct}% done</span></div>
         <div class="pbar"><div class="pfill ${pct===100?'done':''}" style="width:${pct}%"></div></div>
@@ -600,7 +555,6 @@ function renderPropPage(){
     </div>`:''}
   </div>`;
 }
-
 function renderUnitPage(){
   const p=state.properties.find(x=>x.id===view.pid);
   const u=p&&p.units.find(x=>x.id===view.uid);
@@ -608,7 +562,7 @@ function renderUnitPage(){
   const icon=u.isYard?'🌿':'🚪';
   const cost=u.improvements.reduce((a,i)=>a+(Number(i.cost)||0),0);
   const photos=u.photos||[];
-  return`<div class="bc">
+  return `<div class="bc">
     <span class="crumb" onclick="navHome()">Home</span><span class="sep">/</span>
     <span class="crumb" onclick="navProp('${p.id}')">${esc(p.name)}</span><span class="sep">/</span>
     <span>${icon} ${esc(u.name)}</span>
@@ -617,7 +571,7 @@ function renderUnitPage(){
     <div><div class="pg-title">${icon} ${esc(u.name)}</div>
     <div class="pg-sub">${esc(p.name)}${!u.isYard?' &bull; '+esc(u.type):''}</div></div>
     <div class="hdr-btns">
-      ${!u.isYard?`<button class="btn btn-ghost btn-sm" onclick="openModal('editUnit','${p.id}','${u.id}')">✏️ Edit</button>`:''}
+      ${!u.isYard?'<button class="btn btn-ghost btn-sm" onclick="openModal('editUnit',''+p.id+'',''+u.id+'')">✏️ Edit</button>':''}
       <button class="btn btn-primary btn-sm" onclick="openModal('addImp','${p.id}','${u.id}')">+ Project</button>
     </div>
   </div>
@@ -628,18 +582,18 @@ function renderUnitPage(){
     <div class="stat gold"><div class="v">$${cost.toLocaleString()}</div><div class="l">Cost</div></div>
     <div class="stat"><div class="v">${photos.length}</div><div class="l">Photos</div></div>
   </div>
-
   <div class="photo-section">
     <div class="photo-sec-title">📷 Photos
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('pu_${u.id}').click()">+ Add</button>
       <input type="file" id="pu_${u.id}" accept="image/*" multiple style="display:none" onchange="handleUnitPhoto(event,'${p.id}','${u.id}')">
     </div>
-    ${photos.length?`<div class="photo-grid">${photos.map((ph,i)=>`
-      <div class="photo-thumb" onclick="openLightbox('${ph.data}')">
-        <img src="${ph.data}" alt="">
-        ${ph.caption?`<div class="photo-caption">${esc(ph.caption)}</div>`:''}
-        <button class="photo-del" onclick="event.stopPropagation();delUnitPhoto('${p.id}','${u.id}',${i})">✕</button>
-      </div>`).join('')}</div>`
+    ${photos.length?
+      `<div class="photo-grid">${photos.map((ph,i)=>
+        `<div class="photo-thumb" onclick="openLightbox('${ph.data}')">
+          <img src="${ph.data}" alt="">
+          ${ph.caption?`<div class="photo-caption">${esc(ph.caption)}</div>`:''}
+          <button class="photo-del" onclick="event.stopPropagation();delUnitPhoto('${p.id}','${u.id}',${i})">✕</button>
+        </div>`).join('')}</div>`
     :`<div class="upload-zone" onclick="document.getElementById('pu_${u.id}').click()">
       <div style="font-size:1.6rem;margin-bottom:5px">📷</div>
       <div>Tap to add photos</div>
@@ -658,7 +612,7 @@ function renderImpCard(pid,uid2,imp){
   const cs=imp.cost?'$'+Number(imp.cost).toLocaleString():'—';
   const log=imp.log||[];
   const photos=imp.photos||[];
-  return`<div class="imp-card ${exp?'expanded':''}" id="ic_${imp.id}">
+  return `<div class="imp-card ${exp?'expanded':''}" id="ic_${imp.id}">
     <div class="imp-ch" onclick="togImp('${imp.id}')">
       <span class="badge ${bc}">${imp.status.toUpperCase()}</span>
       <span class="imp-title">${esc(imp.title)}</span>
@@ -677,11 +631,13 @@ function renderImpCard(pid,uid2,imp){
         <button class="btn btn-ghost btn-sm" onclick="document.getElementById('ip_${imp.id}').click()">+ Add</button>
         <input type="file" id="ip_${imp.id}" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,'${pid}','${uid2}','${imp.id}')">
       </div>
-      ${photos.length?`<div class="photo-grid" style="margin-bottom:12px">${photos.map((ph,i)=>`
-        <div class="photo-thumb" onclick="openLightbox('${ph.data}')">
-          <img src="${ph.data}" alt="">
-          <button class="photo-del" onclick="event.stopPropagation();delImpPhoto('${pid}','${uid2}','${imp.id}',${i})">✕</button>
-        </div>`).join('')}</div>`:'<p style="font-size:.76rem;color:var(--muted);font-style:italic;margin-bottom:12px">No project photos yet.</p>'}
+      ${photos.length?
+        `<div class="photo-grid" style="margin-bottom:12px">${photos.map((ph,i)=>
+          `<div class="photo-thumb" onclick="openLightbox('${ph.data}')">
+            <img src="${ph.data}" alt="">
+            <button class="photo-del" onclick="event.stopPropagation();delImpPhoto('${pid}','${uid2}','${imp.id}',${i})">✕</button>
+          </div>`).join('')}</div>`
+        :'<p style="font-size:.76rem;color:var(--muted);font-style:italic;margin-bottom:12px">No project photos yet.</p>'}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
         <span style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Timeline</span>
         <div style="display:flex;gap:5px">
@@ -690,24 +646,24 @@ function renderImpCard(pid,uid2,imp){
           <button class="btn btn-danger btn-sm" onclick="delImp('${pid}','${uid2}','${imp.id}')">✕</button>
         </div>
       </div>
-      ${log.length?`<div class="tl">${log.map(e=>`
-        <div class="tl-entry">
-          <div class="tl-dot ${e.type}"></div>
-          <div class="tl-type">${e.type==='start'?'🚀 Start':e.type==='done'?'✅ Done':'📝 Update'}</div>
-          <div class="tl-date">${e.date}</div>
-          <div class="tl-text">${esc(e.text)}</div>
-        </div>`).join('')}</div>`:'<p style="font-size:.77rem;color:var(--muted);font-style:italic">No entries yet.</p>'}
+      ${log.length?
+        `<div class="tl">${log.map(e=>
+          `<div class="tl-entry">
+            <div class="tl-dot ${e.type}"></div>
+            <div class="tl-type">${e.type==='start'?'🚀 Start':e.type==='done'?'✅ Done':'📝 Update'}</div>
+            <div class="tl-date">${e.date}</div>
+            <div class="tl-text">${esc(e.text)}</div>
+          </div>`).join('')}</div>`
+        :'<p style="font-size:.77rem;color:var(--muted);font-style:italic">No entries yet.</p>'}
     </div>
   </div>`;
 }
-
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 function navHome(){view={page:'home',pid:null,uid:null,expImp:null};render();scrollTop();}
 function navProp(pid){view={page:'prop',pid,uid:null,expImp:null};render();scrollTop();}
 function navUnit(pid,uid2){view={page:'unit',pid,uid:uid2,expImp:null};render();scrollTop();}
 function togImp(id){view.expImp=view.expImp===id?null:id;renderMain();}
 function scrollTop(){document.getElementById('mainContent').scrollTop=0;}
-
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
   document.getElementById('sidebarOverlay').classList.toggle('open');
@@ -730,7 +686,6 @@ function compressImage(dataUrl,maxW,cb){
     cb(c.toDataURL('image/jpeg',0.75));
   };img.src=dataUrl;
 }
-
 function processFiles(files,cb){
   let done=0,results=[];
   [...files].forEach((file,i)=>{
@@ -743,7 +698,6 @@ function processFiles(files,cb){
     };r.readAsDataURL(file);
   });
 }
-
 function handleUnitPhoto(event,pid,uid2){
   processFiles(event.target.files,photos=>{
     const p=state.properties.find(x=>x.id===pid);
@@ -752,7 +706,6 @@ function handleUnitPhoto(event,pid,uid2){
     save();renderMain();
   });event.target.value='';
 }
-
 function handleImpPhoto(event,pid,uid2,impId){
   processFiles(event.target.files,photos=>{
     const p=state.properties.find(x=>x.id===pid);
@@ -762,7 +715,6 @@ function handleImpPhoto(event,pid,uid2,impId){
     save();view.expImp=impId;renderMain();
   });event.target.value='';
 }
-
 function delUnitPhoto(pid,uid2,idx){
   if(!confirm('Remove photo?'))return;
   const p=state.properties.find(x=>x.id===pid);
@@ -776,7 +728,6 @@ function delImpPhoto(pid,uid2,impId,idx){
   const imp=u.improvements.find(x=>x.id===impId);
   imp.photos.splice(idx,1);save();view.expImp=impId;renderMain();
 }
-
 function openLightbox(src){document.getElementById('lbImg').src=src;document.getElementById('lightbox').classList.add('open');}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
 
@@ -793,31 +744,27 @@ function closeModal(){document.getElementById('modalOv').classList.remove('open'
 function closeMIfBg(e){if(e.target===document.getElementById('modalOv'))closeModal();}
 
 function buildModal(type,...a){
-  if(type==='addProperty')return`<h3>Add Property</h3>
+  if(type==='addProperty')return `<h3>Add Property</h3>
     <div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" placeholder="e.g. 123 Main St"></div>
     <div class="fg"><label class="fl">Address</label><input class="fi" id="m1" placeholder="Full address"></div>
     <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddProp()">Add</button></div>`;
-
-  if(type==='editProp'){const p=state.properties.find(x=>x.id===a[0]);return`<h3>Edit Property</h3>
+  if(type==='editProp'){const p=state.properties.find(x=>x.id===a[0]);return `<h3>Edit Property</h3>
     <div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="${esc(p.name)}"></div>
     <div class="fg"><label class="fl">Address</label><input class="fi" id="m1" value="${esc(p.address)}"></div>
     <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subEditProp('${p.id}')">Save</button></div>`;}
-
-  if(type==='addUnit')return`<h3>Add Unit</h3>
+  if(type==='addUnit')return `<h3>Add Unit</h3>
     <div class="frow">
       <div class="fg"><label class="fl">Unit Name *</label><input class="fi" id="m0" placeholder="e.g. Unit D"></div>
       <div class="fg"><label class="fl">Type</label><input class="fi" id="m1" placeholder="e.g. 2 Bed / 1 Bath"></div>
     </div>
     <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddUnit('${a[0]}')">Add Unit</button></div>`;
-
-  if(type==='editUnit'){const p=state.properties.find(x=>x.id===a[0]);const u=p.units.find(x=>x.id===a[1]);return`<h3>Edit Unit</h3>
+  if(type==='editUnit'){const p=state.properties.find(x=>x.id===a[0]);const u=p.units.find(x=>x.id===a[1]);return `<h3>Edit Unit</h3>
     <div class="frow">
       <div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="${esc(u.name)}"></div>
       <div class="fg"><label class="fl">Type</label><input class="fi" id="m1" value="${esc(u.type)}"></div>
     </div>
     <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subEditUnit('${a[0]}','${a[1]}')">Save</button></div>`;}
-
-  if(type==='addImp')return`<h3>Log Project</h3>
+  if(type==='addImp')return `<h3>Log Project</h3>
     <div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" placeholder="e.g. Replace water heater"></div>
     <div class="frow">
       <div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
@@ -833,10 +780,9 @@ function buildModal(type,...a){
     </div>
     <div class="fg"><label class="fl">Notes / Scope</label><textarea class="fta" id="m7" placeholder="Describe the work..."></textarea></div>
     <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddImp('${a[0]}','${a[1]}')">Log Project</button></div>`;
-
   if(type==='editImp'){
     const p=state.properties.find(x=>x.id===a[0]);const u=p.units.find(x=>x.id===a[1]);const imp=u.improvements.find(x=>x.id===a[2]);
-    return`<h3>Edit Project</h3>
+    return `<h3>Edit Project</h3>
     <div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="${esc(imp.title)}"></div>
     <div class="frow">
       <div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">${CATS.map(c=>`<option ${c===imp.category?'selected':''}>${c}</option>`).join('')}</select></div>
@@ -852,8 +798,7 @@ function buildModal(type,...a){
     </div>
     <div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m7">${esc(imp.notes||'')}</textarea></div>
     <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subEditImp('${a[0]}','${a[1]}','${a[2]}')">Save</button></div>`;}
-
-  if(type==='addLog')return`<h3>Add Timeline Entry</h3>
+  if(type==='addLog')return `<h3>Add Timeline Entry</h3>
     <div class="frow">
       <div class="fg"><label class="fl">Date</label><input class="fi" id="m0" type="date" value="${today()}"></div>
       <div class="fg"><label class="fl">Type</label><select class="fsel" id="m1">
@@ -864,7 +809,6 @@ function buildModal(type,...a){
     </div>
     <div class="fg"><label class="fl">Description *</label><textarea class="fta" id="m2" placeholder="What happened or was completed?"></textarea></div>
     <div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="subAddLog('${a[0]}','${a[1]}','${a[2]}')">Add</button></div>`;
-
   return'<p>Unknown modal.</p>';
 }
 
