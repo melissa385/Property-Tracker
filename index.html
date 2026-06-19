@@ -310,11 +310,17 @@ window.addEventListener('load', () => {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
-  // Check for stored token
-  const stored = sessionStorage.getItem('pt_token');
-  if (stored) {
+  // Check for stored token with expiry
+  const stored = localStorage.getItem('pt_token');
+  const expiry = localStorage.getItem('pt_token_expiry');
+  const valid = stored && expiry && Date.now() < Number(expiry);
+  if (valid) {
     accessToken = stored;
-    loadUserInfo().then(() => loadFromDrive()).catch(() => showSignIn());
+    loadUserInfo().then(() => loadFromDrive()).catch(() => {
+      localStorage.removeItem('pt_token');
+      localStorage.removeItem('pt_token_expiry');
+      showSignIn();
+    });
   }
 });
 
@@ -325,25 +331,33 @@ function showSignIn() {
 }
 
 function signIn() {
-  // Initialize token client
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: async (resp) => {
-      if (resp.error) { showToast('Sign in failed'); return; }
+      if (resp.error) { showToast('Sign in failed: ' + (resp.error||'')); return; }
+      if (!resp.access_token) { showToast('No token received'); return; }
       accessToken = resp.access_token;
-      sessionStorage.setItem('pt_token', accessToken);
-      await loadUserInfo();
-      await loadFromDrive();
+      // Store with expiry
+      const expiry = Date.now() + (resp.expires_in || 3600) * 1000;
+      localStorage.setItem('pt_token', accessToken);
+      localStorage.setItem('pt_token_expiry', expiry);
+      try {
+        await loadUserInfo();
+        await loadFromDrive();
+      } catch(e) {
+        showToast('Error loading data: ' + e.message);
+      }
     },
   });
-  tokenClient.requestAccessToken({prompt: 'consent'});
+  tokenClient.requestAccessToken({prompt: ''});
 }
 
 function signOut() {
   google.accounts.oauth2.revoke(accessToken, () => {});
   accessToken = null;
-  sessionStorage.removeItem('pt_token');
+  localStorage.removeItem('pt_token');
+  localStorage.removeItem('pt_token_expiry');
   userInfo = null;
   driveFileId = null;
   state = null;
