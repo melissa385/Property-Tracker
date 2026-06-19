@@ -70,6 +70,29 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .inspo-actions{display:flex;gap:5px;margin-top:8px;}
 .inspo-empty{text-align:center;padding:40px 16px;color:var(--muted);}
 .inspo-empty .ei{font-size:2.2rem;margin-bottom:8px;}
+
+/* Portfolio & Cost Cards */
+.portfolio-header{margin:18px 0 10px;}
+.portfolio-header h2{font-family:Georgia,serif;font-size:1rem;color:var(--forest);margin:0;}
+.portfolio-card{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);margin-bottom:18px;box-shadow:var(--sh);overflow:hidden;}
+.pf-header{display:flex;gap:12px;padding:14px 14px 10px;align-items:flex-start;}
+.pf-hero{width:100px;height:80px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--parchment);}
+.pf-hero img{width:100%;height:100%;object-fit:cover;}
+.pf-meta{flex:1;min-width:0;}
+.pf-title{font-family:Georgia,serif;font-size:.95rem;font-weight:700;color:var(--forest);margin-bottom:3px;line-height:1.3;}
+.pf-cat{font-size:.68rem;color:var(--sage);margin-bottom:3px;}
+.pf-cost-big{font-size:1.05rem;font-weight:700;color:var(--green-bright);margin-bottom:2px;}
+.pf-dates,.pf-contractor{font-size:.68rem;color:var(--muted);margin-bottom:1px;}
+.pf-notes{background:var(--parchment);border-left:3px solid var(--green-accent);border-radius:0 6px 6px 0;padding:8px 12px 8px 14px;font-size:.8rem;color:var(--slate);margin:0 14px 10px;line-height:1.5;}
+.pf-cost-breakdown{margin:0 14px 10px;border-radius:8px;overflow:hidden;}
+.pf-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;padding:0 14px 10px;}
+.pf-tl-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 14px 6px;}
+.pf-actions{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--parchment);background:var(--bg);}
+.cost-breakdown{background:var(--parchment);border-radius:8px;overflow:hidden;margin-bottom:12px;}
+.pf-cost-breakdown{background:var(--parchment);}
+.cost-item-row{display:flex;align-items:center;margin-bottom:5px;}
+.cost-line-row{display:flex;justify-content:space-between;padding:5px 10px;font-size:.78rem;color:var(--slate);border-bottom:1px solid rgba(0,0,0,.05);}
+.cost-line-total{display:flex;justify-content:space-between;padding:6px 10px;font-size:.8rem;font-weight:700;color:var(--forest);background:rgba(44,122,55,.08);}
 </style>
 </head>
 <body>
@@ -379,11 +402,14 @@ function renderUnitPage(){
   var u=p&&p.units.find(function(x){ return x.id===view.uid; });
   if(!p||!u) return '<p>Not found.</p>';
   var icon=u.isYard?'&#x1F33F;':'&#x1F6AA;';
-  var cost=u.improvements.reduce(function(a,i){ return a+(Number(i.cost)||0); },0);
+  var totalCost=u.improvements.reduce(function(a,i){
+    var lineTotal=(i.costItems||[]).reduce(function(s,li){ return s+(parseFloat(li.amount)||0); },0);
+    return a+(lineTotal||(Number(i.cost)||0));
+  },0);
   var photos=u.photos||[];
   var html="";
   html += '<div class="bc"><span class="crumb" onclick="navHome()">Home</span><span class="sep">/</span>';
-  html += '<span class="crumb" onclick="navProp(\'' + p.id + '\')">' + esc(p.name) + '</span><span class="sep">/</span>';
+  html += '<span class="crumb" onclick="navProp(\'' + p.id + '\')">'+esc(p.name)+'</span><span class="sep">/</span>';
   html += '<span>' + icon + ' ' + esc(u.name) + '</span></div>';
   html += '<div class="pg-hdr"><div><div class="pg-title">' + icon + ' ' + esc(u.name) + '</div>';
   html += '<div class="pg-sub">' + esc(p.name) + (!u.isYard ? ' &bull; ' + esc(u.type) : "") + '</div></div>';
@@ -395,7 +421,7 @@ function renderUnitPage(){
   html += '<div class="stat"><div class="v">' + u.improvements.length + '</div><div class="l">Projects</div></div>';
   html += '<div class="stat g"><div class="v">' + u.improvements.filter(function(i){ return i.status==="active"; }).length + '</div><div class="l">Active</div></div>';
   html += '<div class="stat g"><div class="v">' + u.improvements.filter(function(i){ return i.status==="done"; }).length + '</div><div class="l">Done</div></div>';
-  html += '<div class="stat gold"><div class="v">$' + cost.toLocaleString() + '</div><div class="l">Cost</div></div>';
+  html += '<div class="stat gold"><div class="v">$' + totalCost.toLocaleString() + '</div><div class="l">Cost</div></div>';
   html += '<div class="stat"><div class="v">' + photos.length + '</div><div class="l">Photos</div></div></div>';
   html += '<div class="photo-section"><div class="photo-sec-title">&#x1F4F7; Photos';
   html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pu_' + u.id + '\').click()">+ Add</button>';
@@ -412,19 +438,77 @@ function renderUnitPage(){
     html += '<div class="upload-zone" onclick="document.getElementById(\'pu_' + u.id + '\').click()"><div style="font-size:1.6rem;margin-bottom:5px">&#x1F4F7;</div><div>Tap to add photos</div></div>';
   }
   html += '</div><hr class="sec-divider">';
-  html += '<div class="imp-hdr-row"><h2>' + (u.isYard?"Yard ":"") + 'Projects</h2></div>';
-  if(!u.improvements.length) html += '<div class="empty"><div class="ei">' + (u.isYard?"&#x1F331;":"&#x1F528;") + '</div><h3>No projects yet</h3><p>Tap &ldquo;+ Project&rdquo; to log your first improvement.</p></div>';
-  u.improvements.forEach(function(imp){ html += renderImpCard(p.id,u.id,imp); });
+  var doneProjs=u.improvements.filter(function(i){ return i.status==="done"; });
+  var activeProjs=u.improvements.filter(function(i){ return i.status!=="done"; });
+  if(doneProjs.length){
+    html += '<div class="portfolio-header"><h2>&#x1F3C6; Portfolio &#x2014; Completed Projects</h2></div>';
+    doneProjs.forEach(function(imp){ html += renderImpCard(p.id,u.id,imp,true); });
+    html += '<hr class="sec-divider">';
+  }
+  html += '<div class="imp-hdr-row"><h2>' + (u.isYard?"Yard ":"") + 'Active Projects</h2></div>';
+  if(!activeProjs.length && !doneProjs.length) html += '<div class="empty"><div class="ei">' + (u.isYard?"&#x1F331;":"&#x1F528;") + '</div><h3>No projects yet</h3><p>Tap &ldquo;+ Project&rdquo; to log your first improvement.</p></div>';
+  else if(!activeProjs.length) html += '<div class="empty" style="padding:18px"><p style="color:var(--muted);font-style:italic">All projects complete! Tap &ldquo;+ Project&rdquo; to add more.</p></div>';
+  activeProjs.forEach(function(imp){ html += renderImpCard(p.id,u.id,imp,false); });
   return html;
 }
-
-function renderImpCard(pid,uid2,imp){
+function renderImpCard(pid,uid2,imp,isPortfolio){
   var exp=view.expImp===imp.id;
   var bcMap={planned:'b-planned',active:'b-active',done:'b-done',paused:'b-paused'};
   var bc=bcMap[imp.status]||'b-planned';
-  var cs=imp.cost?'$'+Number(imp.cost).toLocaleString():'&#x2014;';
+  var costItems=imp.costItems||[];
+  var totalCost=costItems.reduce(function(s,li){ return s+(parseFloat(li.amount)||0); },0)||(Number(imp.cost)||0);
+  var cs=totalCost?'$'+totalCost.toLocaleString():'&#x2014;';
   var log=imp.log||[]; var photos=imp.photos||[];
   var html="";
+  if(isPortfolio && imp.status==='done'){
+    html += '<div class="portfolio-card" id="ic_' + imp.id + '">';
+    html += '<div class="pf-header">';
+    if(photos.length){ html += '<div class="pf-hero"><img src="' + photos[0].data + '" alt=""></div>'; }
+    html += '<div class="pf-meta">';
+    html += '<div class="pf-title">' + esc(imp.title) + '</div>';
+    if(imp.category) html += '<div class="pf-cat">&#x1F3F7; ' + esc(imp.category) + '</div>';
+    html += '<div class="pf-cost-big">$' + totalCost.toLocaleString() + '</div>';
+    var dur='';
+    if(imp.startDate&&imp.endDate){ dur=imp.startDate+' &rarr; '+imp.endDate; }
+    else if(imp.startDate){ dur='Started '+imp.startDate; }
+    if(dur) html += '<div class="pf-dates">&#x1F4C5; ' + dur + '</div>';
+    if(imp.contractor) html += '<div class="pf-contractor">&#x1F528; ' + esc(imp.contractor) + '</div>';
+    html += '</div></div>';
+    if(imp.notes) html += '<div class="pf-notes">' + esc(imp.notes) + '</div>';
+    if(costItems.length>1){
+      html += '<div class="pf-cost-breakdown">';
+      costItems.forEach(function(li){
+        html += '<div class="cost-line-row"><span>' + esc(li.desc||'Item') + '</span><span>$' + (parseFloat(li.amount)||0).toLocaleString() + '</span></div>';
+      });
+      html += '<div class="cost-line-total"><span>Total</span><span>$' + totalCost.toLocaleString() + '</span></div>';
+      html += '</div>';
+    }
+    if(photos.length>1){
+      html += '<div class="pf-gallery">';
+      photos.slice(1).forEach(function(ph){
+        html += '<div class="photo-thumb" onclick="openLightbox(\'' + ph.data + '\')"><img src="' + ph.data + '" alt=""></div>';
+      });
+      html += '</div>';
+    }
+    if(log.length){
+      html += '<div class="pf-tl-title">&#x1F4D6; Project Story</div>';
+      html += '<div class="tl" style="padding:0 16px 12px 40px">';
+      log.forEach(function(e){
+        var ttype=e.type==='start'?'&#x1F680; Start':e.type==='done'?'&#x2705; Completion':'&#x1F4DD; Update';
+        html += '<div class="tl-entry"><div class="tl-dot ' + e.type + '"></div>';
+        html += '<div class="tl-type">' + ttype + '</div><div class="tl-date">' + e.date + '</div><div class="tl-text">' + esc(e.text) + '</div></div>';
+      });
+      html += '</div>';
+    }
+    html += '<div class="pf-actions">';
+    html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'ip_' + imp.id + '\').click()">&#x1F4F7; Photo</button>';
+    html += '<input type="file" id="ip_' + imp.id + '" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">';
+    html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'addLog\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">+ Entry</button>';
+    html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'editImp\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">&#x270F;&#xFE0F; Edit</button>';
+    html += '<button class="btn btn-danger btn-sm" onclick="delImp(\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">&#x2715;</button>';
+    html += '</div></div>';
+    return html;
+  }
   html += '<div class="imp-card ' + (exp?"expanded":"") + '" id="ic_' + imp.id + '">';
   html += '<div class="imp-ch" onclick="togImp(\'' + imp.id + '\')">';
   html += '<span class="badge ' + bc + '">' + imp.status.toUpperCase() + '</span>';
@@ -437,6 +521,14 @@ function renderImpCard(pid,uid2,imp){
   html += '<div><div class="ml">End</div><div class="mv">' + (imp.endDate||'Ongoing') + '</div></div>';
   html += '</div>';
   if(imp.notes) html += '<div class="notes-box">' + esc(imp.notes) + '</div>';
+  if(costItems.length){
+    html += '<div class="cost-breakdown">';
+    costItems.forEach(function(li){
+      html += '<div class="cost-line-row"><span>' + esc(li.desc||'Item') + '</span><span>$' + (parseFloat(li.amount)||0).toLocaleString() + '</span></div>';
+    });
+    html += '<div class="cost-line-total"><span>Total</span><span>$' + totalCost.toLocaleString() + '</span></div>';
+    html += '</div>';
+  }
   html += '<div class="photo-sec-title" style="margin-bottom:8px">&#x1F4F7; Project Photos';
   html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'ip_' + imp.id + '\').click()">+ Add</button>';
   html += '<input type="file" id="ip_' + imp.id + '" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')"></div>';
@@ -469,7 +561,6 @@ function renderImpCard(pid,uid2,imp){
   return html;
 }
 
-// NAVIGATION
 function navHome(){ view={page:'home',pid:null,uid:null,expImp:null}; render(); scrollTop(); }
 function navProp(pid){ view={page:'prop',pid:pid,uid:null,expImp:null}; render(); scrollTop(); }
 function navUnit(pid,uid2){ view={page:'unit',pid:pid,uid:uid2,expImp:null}; render(); scrollTop(); }
@@ -582,15 +673,52 @@ function closeLightbox(){ document.getElementById('lightbox').classList.remove('
 // MODALS
 var CATS=['General','Kitchen','Bathroom','Flooring','Electrical','Plumbing','HVAC','Painting','Exterior','Roofing','Windows & Doors','Landscaping','Fencing','Irrigation','Pest Control','Other'];
 var STATUSES=['planned','active','paused','done'];
-function openModal(type){
-  var args=Array.prototype.slice.call(arguments,1);
-  document.getElementById('modalBox').innerHTML=buildModal.apply(null,[type].concat(args));
+function openModal(type,a0,a1,a2){
+  document.getElementById('modalBox').innerHTML=buildModal(type,a0,a1,a2);
   document.getElementById('modalOv').classList.add('open');
-  setTimeout(function(){ var f=document.querySelector('.modal .fi'); if(f) f.focus(); },100);
+  setTimeout(function(){
+    var f=document.querySelector('#modalBox .fi');
+    if(f) f.focus();
+    updateCostTotal();
+    var box=document.getElementById('costItems');
+    if(box){ box.addEventListener('input', function(){ updateCostTotal(); }); }
+  },50);
 }
 function closeModal(){ document.getElementById('modalOv').classList.remove('open'); }
 function closeMIfBg(e){ if(e.target===document.getElementById('modalOv')) closeModal(); }
-
+function addCostItem(){
+  var box=document.getElementById('costItems');
+  if(!box) return;
+  var row=document.createElement('div');
+  row.className='cost-item-row';
+  row.innerHTML='<input class="fi cost-desc" placeholder="Description" style="flex:1"><input class="fi cost-amt" type="number" placeholder="$0" style="width:90px;margin-left:6px"><button type="button" class="btn btn-ghost btn-sm" onclick="removeCostItem(this)" style="margin-left:4px;flex-shrink:0">&#x2715;</button>';
+  box.appendChild(row);
+  row.querySelector('.cost-desc').focus();
+  updateCostTotal();
+}
+function removeCostItem(btn){
+  btn.closest('.cost-item-row').remove();
+  updateCostTotal();
+}
+function updateCostTotal(){
+  var amts=document.querySelectorAll('#modalBox .cost-amt');
+  var total=0;
+  amts.forEach(function(a){ total+=parseFloat(a.value)||0; });
+  var el=document.getElementById('costTotal');
+  if(el) el.textContent='Total: $'+total.toLocaleString();
+}
+function getCostItems(){
+  var rows=document.querySelectorAll('#modalBox .cost-item-row');
+  var items=[];
+  rows.forEach(function(row){
+    var descEl=row.querySelector('.cost-desc');
+    var amtEl=row.querySelector('.cost-amt');
+    var desc=descEl?descEl.value:'';
+    var amt=amtEl?parseFloat(amtEl.value)||0:0;
+    if(desc||amt) items.push({desc:desc,amount:amt});
+  });
+  return items;
+}
 function buildModal(type,a0,a1,a2){
   var mfoot='<div class="mfoot"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button>';
   if(type==='addProperty'){
@@ -598,20 +726,20 @@ function buildModal(type,a0,a1,a2){
   }
   if(type==='editProp'){
     var p=state.properties.find(function(x){ return x.id===a0; });
-    return '<h3>Edit Property</h3><div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="' + esc(p.name) + '"></div><div class="fg"><label class="fl">Address</label><input class="fi" id="m1" value="' + esc(p.address) + '"></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditProp(\\\'' + p.id + '\\\')">Save</button></div>';
+    return '<h3>Edit Property</h3><div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="' + esc(p.name) + '"></div><div class="fg"><label class="fl">Address</label><input class="fi" id="m1" value="' + esc(p.address) + '"></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditProp(\'' + p.id + '\')">Save</button></div>';
   }
   if(type==='addUnit'){
-    return '<h3>Add Unit</h3><div class="frow"><div class="fg"><label class="fl">Unit Name *</label><input class="fi" id="m0" placeholder="e.g. Unit D"></div><div class="fg"><label class="fl">Type</label><input class="fi" id="m1" placeholder="e.g. 2 Bed / 1 Bath"></div></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddUnit(\\\'' + a0 + '\\\')">Add Unit</button></div>';
+    return '<h3>Add Unit</h3><div class="frow"><div class="fg"><label class="fl">Unit Name *</label><input class="fi" id="m0" placeholder="e.g. Unit D"></div><div class="fg"><label class="fl">Type</label><input class="fi" id="m1" placeholder="e.g. 2 Bed / 1 Bath"></div></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddUnit(\'' + a0 + '\')">Add Unit</button></div>';
   }
   if(type==='editUnit'){
     var p=state.properties.find(function(x){ return x.id===a0; });
     var u=p.units.find(function(x){ return x.id===a1; });
-    return '<h3>Edit Unit</h3><div class="frow"><div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="' + esc(u.name) + '"></div><div class="fg"><label class="fl">Type</label><input class="fi" id="m1" value="' + esc(u.type) + '"></div></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditUnit(\\\'' + a0 + '\\\',\\\'' + a1 + '\\\')">Save</button></div>';
+    return '<h3>Edit Unit</h3><div class="frow"><div class="fg"><label class="fl">Name *</label><input class="fi" id="m0" value="' + esc(u.name) + '"></div><div class="fg"><label class="fl">Type</label><input class="fi" id="m1" value="' + esc(u.type) + '"></div></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditUnit(\'' + a0 + '\',\'' + a1 + '\')">Save</button></div>';
   }
   if(type==='addImp'){
     var catOpts=CATS.map(function(c){ return '<option>'+c+'</option>'; }).join('');
-    var statOpts=STATUSES.map(function(s){ return '<option value="'+s+'"'+(s==='active'?' selected':'')+'>'+cap(s)+'</option>'; }).join('');
-    return '<h3>Log Project</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" placeholder="e.g. Replace water heater"></div><div class="frow"><div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">'+catOpts+'</select></div><div class="fg"><label class="fl">Status</label><select class="fsel" id="m2">'+statOpts+'</select></div></div><div class="frow"><div class="fg"><label class="fl">Contractor</label><input class="fi" id="m3" placeholder="Name or company"></div><div class="fg"><label class="fl">Cost ($)</label><input class="fi" id="m4" type="number" placeholder="0"></div></div><div class="frow"><div class="fg"><label class="fl">Start Date</label><input class="fi" id="m5" type="date"></div><div class="fg"><label class="fl">End Date</label><input class="fi" id="m6" type="date"></div></div><div class="fg"><label class="fl">Notes / Scope</label><textarea class="fta" id="m7" placeholder="Describe the work..."></textarea></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddImp(\\\'' + a0 + '\\\',\\\'' + a1 + '\\\')">Log Project</button></div>';
+    var statOpts=STATUSES.map(function(s){ return '<option value="'+s+'"'+(s==='planned'?' selected':'')+'>'+cap(s)+'</option>'; }).join('');
+    return '<h3>&#x1F528; Log Project</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" placeholder="e.g. Replace water heater"></div><div class="frow"><div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">'+catOpts+'</select></div><div class="fg"><label class="fl">Status</label><select class="fsel" id="m2">'+statOpts+'</select></div></div><div class="fg"><label class="fl">Contractor</label><input class="fi" id="m3" placeholder="Name or company"></div><div class="frow"><div class="fg"><label class="fl">Start Date</label><input class="fi" id="m4" type="date"></div><div class="fg"><label class="fl">End Date</label><input class="fi" id="m5" type="date"></div></div><div class="fg"><label class="fl">Notes / Scope of Work</label><textarea class="fta" id="m6" placeholder="Describe the work, materials, scope..."></textarea></div><div class="fg"><label class="fl">&#x1F4B0; Cost Line Items</label><div id="costItems"><div class="cost-item-row"><input class="fi cost-desc" placeholder="e.g. Labor" style="flex:1"><input class="fi cost-amt" type="number" placeholder="0" style="width:90px;margin-left:6px"><button type="button" class="btn btn-ghost btn-sm" onclick="removeCostItem(this)" style="margin-left:4px;flex-shrink:0">&#x2715;</button></div></div><button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="addCostItem()">+ Add Line Item</button><div id="costTotal" style="margin-top:6px;font-size:.8rem;font-weight:700;color:var(--forest)">Total: $0</div></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddImp(\'' + a0 + '\',\'' + a1 + '\')">Log Project</button></div>';
   }
   if(type==='editImp'){
     var p=state.properties.find(function(x){ return x.id===a0; });
@@ -619,7 +747,12 @@ function buildModal(type,a0,a1,a2){
     var imp=u.improvements.find(function(x){ return x.id===a2; });
     var catOpts=CATS.map(function(c){ return '<option'+(c===imp.category?' selected':'')+'>'+c+'</option>'; }).join('');
     var statOpts=STATUSES.map(function(s){ return '<option value="'+s+'"'+(s===imp.status?' selected':'')+'>'+cap(s)+'</option>'; }).join('');
-    return '<h3>Edit Project</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="'+esc(imp.title)+'"></div><div class="frow"><div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">'+catOpts+'</select></div><div class="fg"><label class="fl">Status</label><select class="fsel" id="m2">'+statOpts+'</select></div></div><div class="frow"><div class="fg"><label class="fl">Contractor</label><input class="fi" id="m3" value="'+esc(imp.contractor||'')+'"></div><div class="fg"><label class="fl">Cost ($)</label><input class="fi" id="m4" type="number" value="'+(imp.cost||'')+'"></div></div><div class="frow"><div class="fg"><label class="fl">Start Date</label><input class="fi" id="m5" type="date" value="'+(imp.startDate||'')+'"></div><div class="fg"><label class="fl">End Date</label><input class="fi" id="m6" type="date" value="'+(imp.endDate||'')+'"></div></div><div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m7">'+esc(imp.notes||'')+'</textarea></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditImp(\\\'' + a0 + '\\\',\\\'' + a1 + '\\\',\\\'' + a2 + '\\\')">Save</button></div>';
+    var existingItems=(imp.costItems||[]);
+    if(!existingItems.length && imp.cost){ existingItems=[{desc:'Project Cost',amount:imp.cost}]; }
+    var ciHtml=existingItems.map(function(li){
+      return '<div class="cost-item-row"><input class="fi cost-desc" placeholder="Description" style="flex:1" value="'+esc(li.desc||'')+'"><input class="fi cost-amt" type="number" placeholder="0" style="width:90px;margin-left:6px" value="'+(li.amount||'')+'"><button type="button" class="btn btn-ghost btn-sm" onclick="removeCostItem(this)" style="margin-left:4px;flex-shrink:0">&#x2715;</button></div>';
+    }).join('');
+    return '<h3>&#x270F;&#xFE0F; Edit Project</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="'+esc(imp.title)+'"></div><div class="frow"><div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">'+catOpts+'</select></div><div class="fg"><label class="fl">Status</label><select class="fsel" id="m2">'+statOpts+'</select></div></div><div class="fg"><label class="fl">Contractor</label><input class="fi" id="m3" value="'+esc(imp.contractor||'')+'"></div><div class="frow"><div class="fg"><label class="fl">Start Date</label><input class="fi" id="m4" type="date" value="'+(imp.startDate||'')+'"></div><div class="fg"><label class="fl">End Date</label><input class="fi" id="m5" type="date" value="'+(imp.endDate||'')+'"></div></div><div class="fg"><label class="fl">Notes / Scope</label><textarea class="fta" id="m6">'+esc(imp.notes||'')+'</textarea></div><div class="fg"><label class="fl">&#x1F4B0; Cost Line Items</label><div id="costItems">'+ciHtml+'</div><button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="addCostItem()">+ Add Line Item</button><div id="costTotal" style="margin-top:6px;font-size:.8rem;font-weight:700;color:var(--forest)">Total: $0</div></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditImp(\'' + a0 + '\',\'' + a1 + '\',\'' + a2 + '\')">Save</button></div>';
   }
   if(type==='addInspo'){
     var tagOpts=['Kitchen','Bathroom','Bedroom','Living Room','Outdoor','Flooring','Lighting','Paint','Landscaping','Fencing','Other'].map(function(t){ return '<option>'+t+'</option>'; }).join('');
@@ -633,12 +766,11 @@ function buildModal(type,a0,a1,a2){
     return '<h3>Edit Inspiration</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="'+esc(item.title)+'"></div><div class="fg"><label class="fl">Tag / Category</label><select class="fsel" id="m1"><option value="">-- None --</option>'+tagOpts2+'</select></div><div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m2">'+esc(item.desc||'')+'</textarea></div><div class="fg"><label class="fl">Link / URL</label><input class="fi" id="m3" type="url" value="'+esc(item.link||'')+'"></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditInspo(\'' + a0 + '\',\'' + a1 + '\',\'' + a2 + '\')">Save</button></div>';
   }
   if(type==='addLog'){
-    return '<h3>Add Timeline Entry</h3><div class="frow"><div class="fg"><label class="fl">Date</label><input class="fi" id="m0" type="date" value="'+today()+'"></div><div class="fg"><label class="fl">Type</label><select class="fsel" id="m1"><option value="note">&#x1F4DD; Update</option><option value="start">&#x1F680; Start</option><option value="done">&#x2705; Completion</option></select></div></div><div class="fg"><label class="fl">Description *</label><textarea class="fta" id="m2" placeholder="What happened or was completed?"></textarea></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddLog(\\\'' + a0 + '\\\',\\\'' + a1 + '\\\',\\\'' + a2 + '\\\')">Add</button></div>';
+    return '<h3>&#x1F4D6; Add Timeline Entry</h3><div class="frow"><div class="fg"><label class="fl">Date</label><input class="fi" id="m0" type="date" value="'+today()+'"></div><div class="fg"><label class="fl">Type</label><select class="fsel" id="m1"><option value="note">&#x1F4DD; Update</option><option value="start">&#x1F680; Start</option><option value="done">&#x2705; Completion</option></select></div></div><div class="fg"><label class="fl">Description *</label><textarea class="fta" id="m2" placeholder="What happened or was completed?"></textarea></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddLog(\'' + a0 + '\',\'' + a1 + '\',\'' + a2 + '\')">Add Entry</button></div>';
   }
   return '<p>Unknown modal.</p>';
 }
 
-// SUBMIT
 function v(id){ var e=document.getElementById(id); return e?e.value.trim():''; }
 function today(){ return new Date().toISOString().slice(0,10); }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
@@ -660,13 +792,15 @@ function subEditUnit(pid,uid2){ var n=v('m0'); if(!n) return alert('Name require
 function subAddImp(pid,uid2){ var t=v('m0'); if(!t) return alert('Title required.');
   var p=state.properties.find(function(x){ return x.id===pid; });
   var u=p.units.find(function(x){ return x.id===uid2; });
-  u.improvements.push({id:uid(),title:t,category:v('m1'),status:v('m2'),contractor:v('m3'),cost:v('m4'),startDate:v('m5'),endDate:v('m6'),notes:v('m7'),log:[],photos:[]});
+  var costItems=getCostItems();
+  u.improvements.push({id:uid(),title:t,category:v('m1'),status:v('m2'),contractor:v('m3'),startDate:v('m4'),endDate:v('m5'),notes:v('m6'),costItems:costItems,log:[],photos:[]});
   save(); closeModal(); render(); }
 function subEditImp(pid,uid2,impId){ var t=v('m0'); if(!t) return alert('Title required.');
   var p=state.properties.find(function(x){ return x.id===pid; });
   var u=p.units.find(function(x){ return x.id===uid2; });
   var imp=u.improvements.find(function(x){ return x.id===impId; });
-  Object.assign(imp,{title:t,category:v('m1'),status:v('m2'),contractor:v('m3'),cost:v('m4'),startDate:v('m5'),endDate:v('m6'),notes:v('m7')});
+  var costItems=getCostItems();
+  Object.assign(imp,{title:t,category:v('m1'),status:v('m2'),contractor:v('m3'),startDate:v('m4'),endDate:v('m5'),notes:v('m6'),costItems:costItems});
   save(); closeModal(); view.expImp=impId; render(); }
 function subAddLog(pid,uid2,impId){ var t=v('m2'); if(!t) return alert('Description required.');
   var p=state.properties.find(function(x){ return x.id===pid; });
@@ -677,7 +811,6 @@ function subAddLog(pid,uid2,impId){ var t=v('m2'); if(!t) return alert('Descript
   imp.log.sort(function(a,b){ return a.date.localeCompare(b.date); });
   save(); closeModal(); view.expImp=impId; render(); }
 
-// INSPIRATION
 function subAddInspo(pid,uid2){ var t=v('m0'); if(!t) return alert('Title required.');
   var p=state.properties.find(function(x){ return x.id===pid; });
   var u=p.units.find(function(x){ return x.id===uid2; });
