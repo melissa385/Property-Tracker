@@ -175,7 +175,7 @@ function renderTopbarUser() {
   if (!userInfo) return;
   var initials = (userInfo.given_name||'?')[0].toUpperCase();
   document.getElementById('topbarRight').innerHTML =
-    '<button class="sync-btn" id="syncBtn" onclick="manualSync()"><span class="sync-icon">â»</span> Sync</button>' +
+    '<button class="sync-btn" id="syncBtn" onclick="manualSync()"><span class="sync-icon">Ã¢ÂÂ»</span> Sync</button>' +
     '<div class="user-initial" onclick="if(confirm(\'Sign out?\'))signOut()">' + initials + '</div>';
 }
 
@@ -207,7 +207,7 @@ function findOrCreateFile() {
 }
 
 function loadFromDrive() {
-  showToast("Loading dataâ¦", 99999);
+  showToast("Loading dataÃ¢ÂÂ¦", 99999);
   return findOrCreateFile().then(function(isNew) {
     if (isNew) {
       state = seed();
@@ -231,7 +231,7 @@ function loadFromDrive() {
     hideToast();
     document.getElementById('signinScreen').style.display = 'none';
     render();
-    showToast(isNew ? "New tracker created â" : "Data loaded â");
+    showToast(isNew ? "New tracker created Ã¢ÂÂ" : "Data loaded Ã¢ÂÂ");
   }).catch(function(e) {
     hideToast(); if (e.message !== 'auth') showToast('Failed to load data');
   });
@@ -243,12 +243,12 @@ function saveToDrive() {
   driveReq('https://www.googleapis.com/upload/drive/v3/files/' + driveFileId + '?uploadType=media',
     { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(state) })
   .then(function(){ setSyncSpinner(false); saving = false; })
-  .catch(function(){ setSyncSpinner(false); saving = false; showToast('Save failed â check connection'); });
+  .catch(function(){ setSyncSpinner(false); saving = false; showToast('Save failed Ã¢ÂÂ check connection'); });
 }
 
 function manualSync() {
-  showToast("Syncingâ¦", 99999);
-  loadFromDrive().then(function(){ hideToast(); showToast('Synced â'); });
+  showToast("SyncingÃ¢ÂÂ¦", 99999);
+  loadFromDrive().then(function(){ hideToast(); showToast('Synced Ã¢ÂÂ'); });
 }
 function setSyncSpinner(on){ var btn=document.getElementById('syncBtn'); if(btn) btn.classList.toggle('spinning',on); }
 var saveTimer=null;
@@ -632,7 +632,7 @@ function buildModal(type,a0,a1,a2){
     var tagOpts2=['Kitchen','Bathroom','Bedroom','Living Room','Outdoor','Flooring','Lighting','Paint','Landscaping','Fencing','Other'].map(function(t){ return '<option'+(item&&t===item.tag?' selected':'')+'>'+t+'</option>'; }).join('');
     return '<h3>Edit Inspiration</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="'+esc(item.title)+'"></div><div class="fg"><label class="fl">Tag / Category</label><select class="fsel" id="m1"><option value="">-- None --</option>'+tagOpts2+'</select></div><div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m2">'+esc(item.desc||'')+'</textarea></div><div class="fg"><label class="fl">Link / URL</label><input class="fi" id="m3" type="url" value="'+esc(item.link||'')+'"></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditInspo(\'' + a0 + '\',\'' + a1 + '\',\'' + a2 + '\')">Save</button></div>';
   }
-  if(type==='addLog'){if(type==='addLog'){
+  if(type==='addLog'){
     return '<h3>Add Timeline Entry</h3><div class="frow"><div class="fg"><label class="fl">Date</label><input class="fi" id="m0" type="date" value="'+today()+'"></div><div class="fg"><label class="fl">Type</label><select class="fsel" id="m1"><option value="note">&#x1F4DD; Update</option><option value="start">&#x1F680; Start</option><option value="done">&#x2705; Completion</option></select></div></div><div class="fg"><label class="fl">Description *</label><textarea class="fta" id="m2" placeholder="What happened or was completed?"></textarea></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddLog(\\\'' + a0 + '\\\',\\\'' + a1 + '\\\',\\\'' + a2 + '\\\')">Add</button></div>';
   }
   return '<p>Unknown modal.</p>';
