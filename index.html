@@ -350,7 +350,7 @@ function signIn() {
       }
     },
   });
-  tokenClient.requestAccessToken({prompt: ''});
+  tokenClient.requestAccessToken({prompt: 'select_account'});
 }
 
 function signOut() {
@@ -391,7 +391,7 @@ async function driveReq(url, opts={}) {
     ...opts,
     headers: { Authorization: `Bearer ${accessToken}`, ...(opts.headers||{}) }
   });
-  if (r.status === 401) { showSignIn(); throw new Error('auth'); }
+  if (r.status === 401) { localStorage.removeItem('pt_token'); localStorage.removeItem('pt_token_expiry'); showSignIn(); throw new Error('auth'); }
   return r;
 }
 
