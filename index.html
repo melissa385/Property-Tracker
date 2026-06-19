@@ -424,7 +424,7 @@ function renderUnitPage(){
   html += '<div class="stat gold"><div class="v">$' + totalCost.toLocaleString() + '</div><div class="l">Cost</div></div>';
   html += '<div class="stat"><div class="v">' + photos.length + '</div><div class="l">Photos</div></div></div>';
   html += '<div class="photo-section"><div class="photo-sec-title">&#x1F4F7; Photos';
-  html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pu_' + u.id + '\').click()">+ Add</button>';
+  html += '<label class="btn btn-ghost btn-sm" for="pu_' + u.id + '" style="cursor:pointer;margin:0">+ Add</label>';
   html += '<input type="file" id="pu_' + u.id + '" accept="image/*" multiple style="display:none" onchange="handleUnitPhoto(event,\'' + p.id + '\',\'' + u.id + '\')"></div>';
   if(photos.length){
     html += '<div class="photo-grid">';
@@ -435,7 +435,7 @@ function renderUnitPage(){
     });
     html += '</div>';
   } else {
-    html += '<div class="upload-zone" onclick="document.getElementById(\'pu_' + u.id + '\').click()"><div style="font-size:1.6rem;margin-bottom:5px">&#x1F4F7;</div><div>Tap to add photos</div></div>';
+    html += '<label class="upload-zone" for="pu_' + u.id + '" style="cursor:pointer;display:block"><div style="font-size:1.6rem;margin-bottom:5px">&#x1F4F7;</div><div>Tap to add photos</div></label>';
   }
   html += '</div><hr class="sec-divider">';
   var doneProjs=u.improvements.filter(function(i){ return i.status==="done"; });
@@ -501,7 +501,7 @@ function renderImpCard(pid,uid2,imp,isPortfolio){
       html += '</div>';
     }
     html += '<div class="pf-actions">';
-    html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'ip_' + imp.id + '\').click()">&#x1F4F7; Photo</button>';
+    html += '<label class="btn btn-ghost btn-sm" for="ip_' + imp.id + '" style="cursor:pointer;margin:0">&#x1F4F7; Photo</label>';
     html += '<input type="file" id="ip_' + imp.id + '" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">';
     html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'addLog\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">+ Entry</button>';
     html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'editImp\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">&#x270F;&#xFE0F; Edit</button>';
@@ -530,7 +530,7 @@ function renderImpCard(pid,uid2,imp,isPortfolio){
     html += '</div>';
   }
   html += '<div class="photo-sec-title" style="margin-bottom:8px">&#x1F4F7; Project Photos';
-  html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'ip_' + imp.id + '\').click()">+ Add</button>';
+  html += '<label class="btn btn-ghost btn-sm" for="ip_' + imp.id + '" style="cursor:pointer;margin:0">+ Add</label>';
   html += '<input type="file" id="ip_' + imp.id + '" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')"></div>';
   if(photos.length){
     html += '<div class="photo-grid" style="margin-bottom:12px">';
