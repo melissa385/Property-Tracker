@@ -58,6 +58,18 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .toast{position:fixed;bottom:calc(20px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--forest);color:var(--mint);padding:10px 18px;border-radius:20px;font-size:.82rem;font-weight:600;z-index:500;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;}.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .hero{background:var(--forest);border-radius:12px;padding:28px 30px;margin-bottom:20px;color:var(--mint);position:relative;overflow:hidden;}.hero::after{content:"\1F33F";position:absolute;right:20px;bottom:-4px;font-size:4rem;opacity:.15;}.hero h1{font-family:Georgia,serif;font-size:1.45rem;margin-bottom:6px;line-height:1.2;}.hero h1 span{color:var(--green-accent);}.hero p{opacity:.65;font-size:.84rem;max-width:340px;}
 .sec-divider{border:none;border-top:1px solid var(--parchment);margin:18px 0;}.empty{text-align:center;padding:44px 16px;color:var(--muted);}.empty .ei{font-size:2rem;margin-bottom:8px;}.empty h3{font-family:Georgia,serif;font-size:.92rem;color:var(--slate);margin-bottom:4px;}.empty p{font-size:.78rem;}
+
+.inspo-card{background:var(--white);border:1px solid var(--parchment);border-radius:var(--r);padding:14px;box-shadow:var(--sh);margin-bottom:10px;position:relative;overflow:hidden;transition:box-shadow .13s,border-color .13s;}
+.inspo-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold);border-radius:4px 0 0 4px;}
+.inspo-card:hover{box-shadow:var(--sh-lg);border-color:#e8d89c;}
+.inspo-tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.62rem;font-weight:700;letter-spacing:.04em;background:#fff8e8;color:#c17f00;margin-right:4px;margin-bottom:4px;}
+.inspo-title{font-weight:700;font-size:.9rem;margin-bottom:4px;color:var(--ink);}
+.inspo-desc{font-size:.8rem;color:var(--slate);margin-bottom:8px;line-height:1.5;}
+.inspo-link{font-size:.75rem;color:var(--green-bright);text-decoration:none;word-break:break-all;}
+.inspo-link:hover{text-decoration:underline;}
+.inspo-actions{display:flex;gap:5px;margin-top:8px;}
+.inspo-empty{text-align:center;padding:40px 16px;color:var(--muted);}
+.inspo-empty .ei{font-size:2.2rem;margin-bottom:8px;}
 </style>
 </head>
 <body>
@@ -163,7 +175,7 @@ function renderTopbarUser() {
   if (!userInfo) return;
   var initials = (userInfo.given_name||'?')[0].toUpperCase();
   document.getElementById('topbarRight').innerHTML =
-    '<button class="sync-btn" id="syncBtn" onclick="manualSync()"><span class="sync-icon">↻</span> Sync</button>' +
+    '<button class="sync-btn" id="syncBtn" onclick="manualSync()"><span class="sync-icon">â»</span> Sync</button>' +
     '<div class="user-initial" onclick="if(confirm(\'Sign out?\'))signOut()">' + initials + '</div>';
 }
 
@@ -195,7 +207,7 @@ function findOrCreateFile() {
 }
 
 function loadFromDrive() {
-  showToast("Loading data…", 99999);
+  showToast("Loading dataâ¦", 99999);
   return findOrCreateFile().then(function(isNew) {
     if (isNew) {
       state = seed();
@@ -219,7 +231,7 @@ function loadFromDrive() {
     hideToast();
     document.getElementById('signinScreen').style.display = 'none';
     render();
-    showToast(isNew ? "New tracker created ✓" : "Data loaded ✓");
+    showToast(isNew ? "New tracker created â" : "Data loaded â");
   }).catch(function(e) {
     hideToast(); if (e.message !== 'auth') showToast('Failed to load data');
   });
@@ -231,12 +243,12 @@ function saveToDrive() {
   driveReq('https://www.googleapis.com/upload/drive/v3/files/' + driveFileId + '?uploadType=media',
     { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify(state) })
   .then(function(){ setSyncSpinner(false); saving = false; })
-  .catch(function(){ setSyncSpinner(false); saving = false; showToast('Save failed — check connection'); });
+  .catch(function(){ setSyncSpinner(false); saving = false; showToast('Save failed â check connection'); });
 }
 
 function manualSync() {
-  showToast("Syncing…", 99999);
-  loadFromDrive().then(function(){ hideToast(); showToast('Synced ✓'); });
+  showToast("Syncingâ¦", 99999);
+  loadFromDrive().then(function(){ hideToast(); showToast('Synced â'); });
 }
 function setSyncSpinner(on){ var btn=document.getElementById('syncBtn'); if(btn) btn.classList.toggle('spinning',on); }
 var saveTimer=null;
@@ -244,8 +256,8 @@ function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveToDrive,800);
 
 // SEED
 function uid(){ return Math.random().toString(36).slice(2,10); }
-function makeUnit(name,type){ return {id:uid(),name:name,type:type,improvements:[],photos:[]}; }
-function makeYard(){ return {id:uid(),name:'Yard',isYard:true,improvements:[],photos:[]}; }
+function makeUnit(name,type){ return {id:uid(),name:name,type:type,improvements:[],photos:[],inspiration:[]}; }
+function makeYard(){ return {id:uid(),name:'Yard',isYard:true,improvements:[],photos:[],inspiration:[]}; }
 function makeProp(name,address,units){ var u=units.slice(); u.push(makeYard()); return {id:uid(),name:name,address:address,units:u}; }
 function seed(){ return {properties:[
   makeProp('1021 Swanson Ln','1021 Swanson Ln, Colfax, CA',[makeUnit('Unit A','Residential'),makeUnit('Unit B','Residential')]),
@@ -275,6 +287,9 @@ function renderSidebar(){
       html += '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (u.isYard?"&#x1F33F; ":"") + esc(u.name) + '</span>';
       if(!u.isYard) html += '<span class="dx" onclick="event.stopPropagation();delUnit(\'' + p.id + '\',\'' + u.id + '\')">&#x2715;</span>';
       html += '</div>';
+      html += '<div class="sub-item ' + (view.page==='inspo'&&view.uid===u.id?"active":"") + '" onclick="navInspo(\'' + p.id + '\',\'' + u.id + '\');closeSidebarMobile()" style="padding-left:40px;font-style:italic;color:var(--gold)">';
+      html += '<span style="font-size:.72rem">&#x2728;</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.75rem">Inspiration</span>';
+      html += '</div>';
     });
     html += '<div class="sub-item" onclick="openModal(\'addUnit\',\'' + p.id + '\')" style="color:var(--green-accent);opacity:.75"><span>+</span><span>Add Unit</span></div>';
     html += '</div></div>';
@@ -288,6 +303,7 @@ function renderMain(){
   if(view.page==='home'){ el.innerHTML=renderHome(); return; }
   if(view.page==='prop'){ el.innerHTML=renderPropPage(); return; }
   if(view.page==='unit'){ el.innerHTML=renderUnitPage(); return; }
+  if(view.page==='inspo'){ el.innerHTML=renderInspoPage(); return; }
 }
 
 function renderHome(){
@@ -373,6 +389,7 @@ function renderUnitPage(){
   html += '<div class="pg-sub">' + esc(p.name) + (!u.isYard ? ' &bull; ' + esc(u.type) : "") + '</div></div>';
   html += '<div class="hdr-btns">';
   if(!u.isYard) html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'editUnit\',\'' + p.id + '\',\'' + u.id + '\')">&#x270F;&#xFE0F; Edit</button>';
+  html += '<button class="btn btn-ghost btn-sm" onclick="navInspo(\'' + p.id + '\',\'' + u.id + '\')">&#x2728; Inspiration</button>';
   html += '<button class="btn btn-primary btn-sm" onclick="openModal(\'addImp\',\'' + p.id + '\',\'' + u.id + '\')">+ Project</button></div></div>';
   html += '<div class="stats">';
   html += '<div class="stat"><div class="v">' + u.improvements.length + '</div><div class="l">Projects</div></div>';
@@ -456,6 +473,43 @@ function renderImpCard(pid,uid2,imp){
 function navHome(){ view={page:'home',pid:null,uid:null,expImp:null}; render(); scrollTop(); }
 function navProp(pid){ view={page:'prop',pid:pid,uid:null,expImp:null}; render(); scrollTop(); }
 function navUnit(pid,uid2){ view={page:'unit',pid:pid,uid:uid2,expImp:null}; render(); scrollTop(); }
+function navInspo(pid,uid2){ view={page:'inspo',pid:pid,uid:uid2,expImp:null}; render(); scrollTop(); }
+
+function renderInspoPage(){
+  var p=state.properties.find(function(x){ return x.id===view.pid; });
+  var u=p&&p.units.find(function(x){ return x.id===view.uid; });
+  if(!p||!u) return '<p>Not found.</p>';
+  var icon=u.isYard?'&#x1F33F;':'&#x1F6AA;';
+  var inspo=u.inspiration||[];
+  var html="";
+  html += '<div class="bc"><span class="crumb" onclick="navHome()">Home</span><span class="sep">/</span>';
+  html += '<span class="crumb" onclick="navProp(\'' + p.id + '\')">' + esc(p.name) + '</span><span class="sep">/</span>';
+  html += '<span class="crumb" onclick="navUnit(\'' + p.id + '\',\'' + u.id + '\')">' + icon + ' ' + esc(u.name) + '</span><span class="sep">/</span>';
+  html += '<span>&#x2728; Inspiration</span></div>';
+  html += '<div class="pg-hdr"><div><div class="pg-title">&#x2728; Inspiration Ideas</div>';
+  html += '<div class="pg-sub">' + icon + ' ' + esc(u.name) + ' &bull; ' + esc(p.name) + '</div></div>';
+  html += '<div class="hdr-btns">';
+  html += '<button class="btn btn-ghost btn-sm" onclick="navUnit(\'' + p.id + '\',\'' + u.id + '\')">&#x2190; Back to Unit</button>';
+  html += '<button class="btn btn-primary btn-sm" onclick="openModal(\'addInspo\',\'' + p.id + '\',\'' + u.id + '\')">+ Add Idea</button>';
+  html += '</div></div>';
+  if(!inspo.length){
+    html += '<div class="inspo-empty"><div class="ei">&#x1F4A1;</div><h3 style="font-family:Georgia,serif;font-size:.92rem;color:var(--slate);margin-bottom:4px">No inspiration ideas yet</h3><p style="font-size:.78rem;color:var(--muted)">Tap &ldquo;+ Add Idea&rdquo; to save inspiration, links, and notes for this space.</p></div>';
+  } else {
+    inspo.forEach(function(item,idx2){
+      html += '<div class="inspo-card">';
+      html += '<div class="inspo-title">' + esc(item.title) + '</div>';
+      if(item.tag) html += '<span class="inspo-tag">' + esc(item.tag) + '</span>';
+      if(item.desc) html += '<div class="inspo-desc">' + esc(item.desc) + '</div>';
+      if(item.link) html += '<a class="inspo-link" href="' + esc(item.link) + '" target="_blank" rel="noopener">&#x1F517; ' + esc(item.link) + '</a>';
+      html += '<div class="inspo-actions">';
+      html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'editInspo\',\'' + p.id + '\',\'' + u.id + '\',\'' + item.id + '\')">&#x270F;&#xFE0F;</button>';
+      html += '<button class="btn btn-danger btn-sm" onclick="delInspo(\'' + p.id + '\',\'' + u.id + '\',\'' + item.id + '\')">&#x2715;</button>';
+      html += '</div></div>';
+    });
+  }
+  return html;
+}
+
 function togImp(id){ view.expImp=view.expImp===id?null:id; renderMain(); }
 function scrollTop(){ document.getElementById('mainContent').scrollTop=0; }
 function toggleSidebar(){
@@ -567,7 +621,18 @@ function buildModal(type,a0,a1,a2){
     var statOpts=STATUSES.map(function(s){ return '<option value="'+s+'"'+(s===imp.status?' selected':'')+'>'+cap(s)+'</option>'; }).join('');
     return '<h3>Edit Project</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="'+esc(imp.title)+'"></div><div class="frow"><div class="fg"><label class="fl">Category</label><select class="fsel" id="m1">'+catOpts+'</select></div><div class="fg"><label class="fl">Status</label><select class="fsel" id="m2">'+statOpts+'</select></div></div><div class="frow"><div class="fg"><label class="fl">Contractor</label><input class="fi" id="m3" value="'+esc(imp.contractor||'')+'"></div><div class="fg"><label class="fl">Cost ($)</label><input class="fi" id="m4" type="number" value="'+(imp.cost||'')+'"></div></div><div class="frow"><div class="fg"><label class="fl">Start Date</label><input class="fi" id="m5" type="date" value="'+(imp.startDate||'')+'"></div><div class="fg"><label class="fl">End Date</label><input class="fi" id="m6" type="date" value="'+(imp.endDate||'')+'"></div></div><div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m7">'+esc(imp.notes||'')+'</textarea></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditImp(\\\'' + a0 + '\\\',\\\'' + a1 + '\\\',\\\'' + a2 + '\\\')">Save</button></div>';
   }
-  if(type==='addLog'){
+  if(type==='addInspo'){
+    var tagOpts=['Kitchen','Bathroom','Bedroom','Living Room','Outdoor','Flooring','Lighting','Paint','Landscaping','Fencing','Other'].map(function(t){ return '<option>'+t+'</option>'; }).join('');
+    return '<h3>Add Inspiration Idea</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" placeholder="e.g. Modern farmhouse sink"></div><div class="fg"><label class="fl">Tag / Category</label><select class="fsel" id="m1"><option value="">-- None --</option>'+tagOpts+'</select></div><div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m2" placeholder="Describe the idea, style, or why you like it..."></textarea></div><div class="fg"><label class="fl">Link / URL</label><input class="fi" id="m3" type="url" placeholder="https://..."></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddInspo(\'' + a0 + '\',\'' + a1 + '\')">Add Idea</button></div>';
+  }
+  if(type==='editInspo'){
+    var p=state.properties.find(function(x){ return x.id===a0; });
+    var u=p.units.find(function(x){ return x.id===a1; });
+    var item=(u.inspiration||[]).find(function(x){ return x.id===a2; });
+    var tagOpts2=['Kitchen','Bathroom','Bedroom','Living Room','Outdoor','Flooring','Lighting','Paint','Landscaping','Fencing','Other'].map(function(t){ return '<option'+(item&&t===item.tag?' selected':'')+'>'+t+'</option>'; }).join('');
+    return '<h3>Edit Inspiration</h3><div class="fg"><label class="fl">Title *</label><input class="fi" id="m0" value="'+esc(item.title)+'"></div><div class="fg"><label class="fl">Tag / Category</label><select class="fsel" id="m1"><option value="">-- None --</option>'+tagOpts2+'</select></div><div class="fg"><label class="fl">Notes</label><textarea class="fta" id="m2">'+esc(item.desc||'')+'</textarea></div><div class="fg"><label class="fl">Link / URL</label><input class="fi" id="m3" type="url" value="'+esc(item.link||'')+'"></div>' + mfoot + '<button class="btn btn-primary" onclick="subEditInspo(\'' + a0 + '\',\'' + a1 + '\',\'' + a2 + '\')">Save</button></div>';
+  }
+  if(type==='addLog'){if(type==='addLog'){
     return '<h3>Add Timeline Entry</h3><div class="frow"><div class="fg"><label class="fl">Date</label><input class="fi" id="m0" type="date" value="'+today()+'"></div><div class="fg"><label class="fl">Type</label><select class="fsel" id="m1"><option value="note">&#x1F4DD; Update</option><option value="start">&#x1F680; Start</option><option value="done">&#x2705; Completion</option></select></div></div><div class="fg"><label class="fl">Description *</label><textarea class="fta" id="m2" placeholder="What happened or was completed?"></textarea></div>' + mfoot + '<button class="btn btn-primary" onclick="subAddLog(\\\'' + a0 + '\\\',\\\'' + a1 + '\\\',\\\'' + a2 + '\\\')">Add</button></div>';
   }
   return '<p>Unknown modal.</p>';
@@ -611,6 +676,25 @@ function subAddLog(pid,uid2,impId){ var t=v('m2'); if(!t) return alert('Descript
   imp.log.push({id:uid(),date:v('m0')||today(),type:v('m1'),text:t});
   imp.log.sort(function(a,b){ return a.date.localeCompare(b.date); });
   save(); closeModal(); view.expImp=impId; render(); }
+
+// INSPIRATION
+function subAddInspo(pid,uid2){ var t=v('m0'); if(!t) return alert('Title required.');
+  var p=state.properties.find(function(x){ return x.id===pid; });
+  var u=p.units.find(function(x){ return x.id===uid2; });
+  if(!u.inspiration) u.inspiration=[];
+  u.inspiration.push({id:uid(),title:t,tag:v('m1'),desc:v('m2'),link:v('m3')});
+  save(); closeModal(); render(); }
+function subEditInspo(pid,uid2,itemId){ var t=v('m0'); if(!t) return alert('Title required.');
+  var p=state.properties.find(function(x){ return x.id===pid; });
+  var u=p.units.find(function(x){ return x.id===uid2; });
+  var item=(u.inspiration||[]).find(function(x){ return x.id===itemId; });
+  Object.assign(item,{title:t,tag:v('m1'),desc:v('m2'),link:v('m3')});
+  save(); closeModal(); render(); }
+function delInspo(pid,uid2,itemId){ if(!confirm('Delete this inspiration idea?')) return;
+  var p=state.properties.find(function(x){ return x.id===pid; });
+  var u=p.units.find(function(x){ return x.id===uid2; });
+  u.inspiration=(u.inspiration||[]).filter(function(x){ return x.id!==itemId; });
+  save(); render(); }
 
 // DELETE
 function delProp(pid){ if(!confirm('Delete this property and everything in it?')) return;
