@@ -93,6 +93,19 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 .cost-item-row{display:flex;align-items:center;margin-bottom:5px;}
 .cost-line-row{display:flex;justify-content:space-between;padding:5px 10px;font-size:.78rem;color:var(--slate);border-bottom:1px solid rgba(0,0,0,.05);}
 .cost-line-total{display:flex;justify-content:space-between;padding:6px 10px;font-size:.8rem;font-weight:700;color:var(--forest);background:rgba(44,122,55,.08);}
+
+/* Drive Picker Modal */
+.drive-picker{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;display:flex;align-items:center;justify-content:center;}
+.drive-picker.hidden{display:none;}
+.drive-picker-box{background:#fff;border-radius:12px;width:min(92vw,520px);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;}
+.drive-picker-head{padding:14px 16px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:10px;}
+.drive-picker-head h3{flex:1;margin:0;font-size:1rem;}
+.drive-picker-search{width:100%;padding:7px 10px;border:1px solid #ccc;border-radius:6px;font-size:.85rem;margin-top:8px;}
+.drive-picker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;overflow-y:auto;flex:1;}
+.drive-picker-thumb{aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid transparent;width:100%;}
+.drive-picker-thumb:hover{border-color:var(--forest);}
+.drive-picker-loading{padding:30px;text-align:center;color:#666;font-size:.9rem;}
+.drive-picker-foot{padding:10px 14px;border-top:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:#666;}
 </style>
 </head>
 <body>
@@ -124,6 +137,20 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);colo
 </div>
 <div class="modal-ov" id="modalOv" onclick="closeMIfBg(event)"><div class="modal" id="modalBox"></div></div>
 <div class="lightbox" id="lightbox" onclick="closeLightbox()"><div class="lb-close">&#x2715;</div><img id="lbImg" src="" alt=""></div>
+<div id="drive-picker" class="drive-picker hidden" onclick="if(event.target===this)closeDrivePicker()">
+  <div class="drive-picker-box">
+    <div class="drive-picker-head">
+      <span style="font-size:1.3rem">📁</span>
+      <h3>Pick from Google Drive</h3>
+      <button onclick="closeDrivePicker()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;padding:0">✕</button>
+    </div>
+    <div id="drive-picker-content"><div class="drive-picker-loading">Loading your photos…</div></div>
+    <div class="drive-picker-foot">
+      <span id="drive-picker-status"></span>
+      <span>Tap a photo to add it</span>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <script src="https://accounts.google.com/gsi/client" async></script>
 <script>
@@ -424,7 +451,7 @@ function renderUnitPage(){
   html += '<div class="stat gold"><div class="v">$' + totalCost.toLocaleString() + '</div><div class="l">Cost</div></div>';
   html += '<div class="stat"><div class="v">' + photos.length + '</div><div class="l">Photos</div></div></div>';
   html += '<div class="photo-section"><div class="photo-sec-title">&#x1F4F7; Photos';
-  html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'pu_'+u.id+'\').click()">+ Add</button><input type="file" id="pu_'+u.id+'" accept="image/*" multiple style="display:none" onchange="handleUnitPhoto(event,\''+p.id+'\',\''+u.id+'\')"></div>';
+  html += '<button class="btn btn-ghost btn-sm" onclick="openDrivePicker(\'unit\',\''+p.id+'\',\''+u.id+'\')" style="font-size:.7rem">📁 Drive</button></div>';
   if(photos.length){
     html += '<div class="photo-grid">';
     photos.forEach(function(ph,i){
@@ -434,7 +461,7 @@ function renderUnitPage(){
     });
     html += '</div>';
   } else {
-    html += '<label class="upload-zone" for="pu_'+u.id+'" style="cursor:pointer;display:block"><div style="font-size:1.6rem;margin-bottom:5px">&#x1F4F7;</div><div>Tap to add photos</div></label>';
+    html += '<div class="upload-zone" onclick="openDrivePicker(\'unit\',\''+p.id+'\',\''+u.id+'\')" style="cursor:pointer"><div style="font-size:1.6rem;margin-bottom:5px">📁</div><div>Tap to pick from Google Drive</div></div>';
   }
   html += '</div><hr class="sec-divider">';
   var doneProjs=u.improvements.filter(function(i){ return i.status==="done"; });
@@ -500,7 +527,7 @@ function renderImpCard(pid,uid2,imp,isPortfolio){
       html += '</div>';
     }
     html += '<div class="pf-actions">';
-    html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'ip_'+imp.id+'\').click()">&#x1F4F7; Photo</button><input type="file" id="ip_'+imp.id+'" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\''+pid+'\',\''+uid2+'\',\''+imp.id+'\'">';
+    html += '<button class="btn btn-ghost btn-sm" onclick="openDrivePicker(\'imp\',\''+pid+'\',\''+uid2+'\',\''+imp.id+'\')" style="font-size:.7rem">📁 Drive</button>';
     html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'addLog\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">+ Entry</button>';
     html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'editImp\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">&#x270F;&#xFE0F; Edit</button>';
     html += '<button class="btn btn-danger btn-sm" onclick="delImp(\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">&#x2715;</button>';
@@ -528,7 +555,7 @@ function renderImpCard(pid,uid2,imp,isPortfolio){
     html += '</div>';
   }
   html += '<div class="photo-sec-title" style="margin-bottom:8px">&#x1F4F7; Project Photos';
-  html += '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'ip2_'+imp.id+'\').click()">+ Add</button><input type="file" id="ip2_'+imp.id+'" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\''+pid+'\',\''+uid2+'\',\''+imp.id+'\')"></div>';
+  html += '<button class="btn btn-ghost btn-sm" onclick="openDrivePicker(\'imp\',\''+pid+'\',\''+uid2+'\',\''+imp.id+'\')" style="font-size:.7rem">📁 Drive</button></div>';
   if(photos.length){
     html += '<div class="photo-grid" style="margin-bottom:12px">';
     photos.forEach(function(ph,i){
@@ -634,6 +661,93 @@ function processFiles(files,cb){
     }; r.readAsDataURL(file);
   });
 }
+// DRIVE PICKER
+var _drivePickerCtx = null;
+var _drivePickerPage = null;
+
+function openDrivePicker(type, pid, uid2, impId) {
+  if (!accessToken) { showToast('Please sign in first'); return; }
+  _drivePickerCtx = { type: type, pid: pid, uid2: uid2, impId: impId };
+  document.getElementById('drive-picker').classList.remove('hidden');
+  loadDriveImages(null);
+}
+
+function closeDrivePicker() {
+  document.getElementById('drive-picker').classList.add('hidden');
+  _drivePickerCtx = null;
+  _drivePickerPage = null;
+}
+
+function loadDriveImages(pageToken) {
+  var content = document.getElementById('drive-picker-content');
+  var status = document.getElementById('drive-picker-status');
+  content.innerHTML = '<div class="drive-picker-loading">Loading…</div>';
+  var q = "mimeType contains 'image/' and trashed=false";
+  var url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) +
+    '&fields=files(id,name,mimeType,thumbnailLink,hasThumbnail)&pageSize=30&orderBy=modifiedTime+desc';
+  if (pageToken) url += '&pageToken=' + encodeURIComponent(pageToken);
+  fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      _drivePickerPage = data.nextPageToken || null;
+      if (!data.files || data.files.length === 0) {
+        content.innerHTML = '<div class="drive-picker-loading">No images found in your Drive.</div>';
+        if (status) status.textContent = '';
+        return;
+      }
+      var grid = '<div class="drive-picker-grid">';
+      data.files.forEach(function(f) {
+        var thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s200') :
+          'https://drive.google.com/thumbnail?id=' + f.id + '&sz=w200-h200&access_token=' + encodeURIComponent(accessToken);
+        grid += '<img class="drive-picker-thumb" src="' + thumb + '" title="' + f.name.replace(/"/g,'') + '" onclick="pickDriveFile('' + f.id + '','' + f.mimeType + '')">';
+      });
+      grid += '</div>';
+      if (_drivePickerPage) {
+        grid += '<div style="text-align:center;padding:8px"><button class="btn btn-ghost btn-sm" onclick="loadDriveImages('' + _drivePickerPage + '')">Load more</button></div>';
+      }
+      content.innerHTML = grid;
+      if (status) status.textContent = data.files.length + ' photos';
+    })
+    .catch(function(e) {
+      content.innerHTML = '<div class="drive-picker-loading">Error loading Drive files. Try signing out and back in.</div>';
+    });
+}
+
+function pickDriveFile(fileId, mimeType) {
+  var ctx = _drivePickerCtx;
+  if (!ctx) return;
+  var status = document.getElementById('drive-picker-status');
+  if (status) status.textContent = 'Loading image…';
+  fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+    headers: { Authorization: 'Bearer ' + accessToken }
+  })
+  .then(function(r){ return r.blob(); })
+  .then(function(blob) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      compressImage(e.target.result, 1000, function(ph) {
+        var data = state;
+        if (ctx.type === 'unit') {
+          var p2 = data.properties.find(function(x){ return x.id === ctx.pid; });
+          var u2 = p2 && (p2.units||[]).concat(p2.yards||[]).find(function(x){ return x.id === ctx.uid2; });
+          if (u2) { if (!u2.photos) u2.photos = []; u2.photos.push({id:uid(),data:ph,caption:'',date:today()}); save(); renderMain(); }
+        } else {
+          var p2 = data.properties.find(function(x){ return x.id === ctx.pid; });
+          var u2 = p2 && (p2.units||[]).concat(p2.yards||[]).find(function(x){ return x.id === ctx.uid2; });
+          var imp2 = u2 && (u2.improvements||[]).find(function(x){ return x.id === ctx.impId; });
+          if (imp2) { if (!imp2.photos) imp2.photos = []; imp2.photos.push({id:uid(),data:ph,caption:'',date:today()}); save(); renderMain(); }
+        }
+        closeDrivePicker();
+        showToast('Photo added!');
+      });
+    };
+    reader.readAsDataURL(blob);
+  })
+  .catch(function(e) {
+    if (status) status.textContent = 'Error loading image.';
+  });
+}
+
 function handleUnitPhoto(event,pid,uid2){
   processFiles(event.target.files,function(photos){
     var p=state.properties.find(function(x){ return x.id===pid; });
