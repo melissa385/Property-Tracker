@@ -198,7 +198,7 @@ function renderTopbarUser() {
   if (!userInfo) return;
   var initials = (userInfo.given_name||'?')[0].toUpperCase();
   document.getElementById('topbarRight').innerHTML =
-    '<button class="sync-btn" id="syncBtn" onclick="manualSync()"><span class="sync-icon">Ã¢ÂÂ»</span> Sync</button>' +
+    '<button class="sync-btn" id="syncBtn" onclick="manualSync()"><span class="sync-icon">↻</span> Sync</button>' +
     '<div class="user-initial" onclick="if(confirm(\'Sign out?\'))signOut()">' + initials + '</div>';
 }
 
