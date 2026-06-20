@@ -1,4 +1,4 @@
-const CACHE = 'prop-tracker-v1';
+const CACHE = 'prop-tracker-v2';
 const ASSETS = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
