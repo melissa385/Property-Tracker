@@ -681,7 +681,7 @@ function closeDrivePicker() {
 function loadDriveImages(pageToken) {
   var content = document.getElementById('drive-picker-content');
   var status = document.getElementById('drive-picker-status');
-  content.innerHTML = '<div class="drive-picker-loading">Loading…</div>';
+  content.innerHTML = '<div class="drive-picker-loading">Loading...</div>';
   var q = "mimeType contains 'image/' and trashed=false";
   var url = 'https://www.googleapis.com/drive/v3/files?q=' + encodeURIComponent(q) +
     '&fields=files(id,name,mimeType,thumbnailLink,hasThumbnail)&pageSize=30&orderBy=modifiedTime+desc';
@@ -717,7 +717,7 @@ function pickDriveFile(fileId, mimeType) {
   var ctx = _drivePickerCtx;
   if (!ctx) return;
   var status = document.getElementById('drive-picker-status');
-  if (status) status.textContent = 'Loading image…';
+  if (status) status.textContent = 'Loading image...';
   fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
     headers: { Authorization: 'Bearer ' + accessToken }
   })
