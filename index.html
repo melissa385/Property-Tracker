@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PropTracker">
 <title>Property Tracker</title>
 <link rel="manifest" href="./manifest.json">
-<style>
+<style>h
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{--forest:#1c3a2a;--forest-mid:#254d38;--forest-light:#2e6044;--sage:#4a7c5f;--mint:#a8d5b5;--green-accent:#5aab6e;--green-bright:#3d8f55;--cream:#f4f7f5;--parchment:#e8ede9;--white:#ffffff;--ink:#1a2e22;--slate:#4a6358;--muted:#7a9a87;--gold:#c8a84b;--danger:#c0392b;--r:8px;--sh:0 2px 10px rgba(28,58,42,.10);--sh-lg:0 8px 28px rgba(28,58,42,.16);--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;overscroll-behavior:none;}
@@ -424,7 +424,7 @@ function renderUnitPage(){
   html += '<div class="stat gold"><div class="v">$' + totalCost.toLocaleString() + '</div><div class="l">Cost</div></div>';
   html += '<div class="stat"><div class="v">' + photos.length + '</div><div class="l">Photos</div></div></div>';
   html += '<div class="photo-section"><div class="photo-sec-title">&#x1F4F7; Photos';
-  html += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">+ Add<input type="file" accept="image/*" multiple style="display:none" onchange="handleUnitPhoto(event,\'' + p.id + '\',\'' + u.id + '\')"></label></div>';
+  html += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">+ Add<input type="file" accept="image/*" multiple style="position:absolute;width:0;height:0;opacity:0;overflow:hidden;" onchange="handleUnitPhoto(event,\'' + p.id + '\',\'' + u.id + '\')"></label></div>';
   if(photos.length){
     html += '<div class="photo-grid">';
     photos.forEach(function(ph,i){
@@ -434,7 +434,7 @@ function renderUnitPage(){
     });
     html += '</div>';
   } else {
-    html += '<label class="upload-zone" style="cursor:pointer;display:block"><input type="file" accept="image/*" multiple style="display:none" onchange="handleUnitPhoto(event,\'' + p.id + '\',\'' + u.id + '\')"><div style="font-size:1.6rem;margin-bottom:5px">&#x1F4F7;</div><div>Tap to add photos</div></label>';
+    html += '<label class="upload-zone" style="cursor:pointer;display:block"><input type="file" accept="image/*" multiple style="position:absolute;width:0;height:0;opacity:0;overflow:hidden;" onchange="handleUnitPhoto(event,\'' + p.id + '\',\'' + u.id + '\')"><div style="font-size:1.6rem;margin-bottom:5px">&#x1F4F7;</div><div>Tap to add photos</div></label>';
   }
   html += '</div><hr class="sec-divider">';
   var doneProjs=u.improvements.filter(function(i){ return i.status==="done"; });
@@ -500,7 +500,7 @@ function renderImpCard(pid,uid2,imp,isPortfolio){
       html += '</div>';
     }
     html += '<div class="pf-actions">';
-    html += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">&#x1F4F7; Photo<input type="file" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')"></label>';
+    html += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">&#x1F4F7; Photo<input type="file" accept="image/*" multiple style="position:absolute;width:0;height:0;opacity:0;overflow:hidden;" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')"></label>';
     html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'addLog\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">+ Entry</button>';
     html += '<button class="btn btn-ghost btn-sm" onclick="openModal(\'editImp\',\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">&#x270F;&#xFE0F; Edit</button>';
     html += '<button class="btn btn-danger btn-sm" onclick="delImp(\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')">&#x2715;</button>';
@@ -528,7 +528,7 @@ function renderImpCard(pid,uid2,imp,isPortfolio){
     html += '</div>';
   }
   html += '<div class="photo-sec-title" style="margin-bottom:8px">&#x1F4F7; Project Photos';
-  html += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">+ Add<input type="file" accept="image/*" multiple style="display:none" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')"></label></div>';
+  html += '<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin:0">+ Add<input type="file" accept="image/*" multiple style="position:absolute;width:0;height:0;opacity:0;overflow:hidden;" onchange="handleImpPhoto(event,\'' + pid + '\',\'' + uid2 + '\',\'' + imp.id + '\')"></label></div>';
   if(photos.length){
     html += '<div class="photo-grid" style="margin-bottom:12px">';
     photos.forEach(function(ph,i){
