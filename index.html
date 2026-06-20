@@ -699,11 +699,11 @@ function loadDriveImages(pageToken) {
       data.files.forEach(function(f) {
         var thumb = f.thumbnailLink ? f.thumbnailLink.replace('=s220', '=s200') :
           'https://drive.google.com/thumbnail?id=' + f.id + '&sz=w200-h200&access_token=' + encodeURIComponent(accessToken);
-        grid += '<img class="drive-picker-thumb" src="' + thumb + '" title="' + f.name.replace(/"/g,'') + '" onclick="pickDriveFile('' + f.id + '','' + f.mimeType + '')">';
+        grid += '<img class="drive-picker-thumb" src="' + thumb + '" title="' + f.name.replace(/"/g,'') + '" data-id="' + f.id + '" data-mime="' + f.mimeType + '" onclick="pickDriveFile(this.dataset.id,this.dataset.mime)">';
       });
       grid += '</div>';
       if (_drivePickerPage) {
-        grid += '<div style="text-align:center;padding:8px"><button class="btn btn-ghost btn-sm" onclick="loadDriveImages('' + _drivePickerPage + '')">Load more</button></div>';
+        grid += '<div style="text-align:center;padding:8px"><button class="btn btn-ghost btn-sm" onclick="loadDriveImages(_drivePickerPage)">Load more</button></div>';
       }
       content.innerHTML = grid;
       if (status) status.textContent = data.files.length + ' photos';
